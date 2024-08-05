@@ -343,7 +343,6 @@ def create_interface():
         gr.Markdown("# AI Prompt Generator and Text Generator")
 
         with gr.Row():
-
             with gr.Column():
                 seed = gr.Number(label="Seed", value=0)
                 custom = gr.Textbox(label="Custom")
@@ -352,14 +351,13 @@ def create_interface():
                 photo_type = gr.Dropdown(["disabled", "random"] + PHOTO_TYPE, label="Photo Type", value="random")
                 body_types = gr.Dropdown(["disabled", "random"] + BODY_TYPES, label="Body Types", value="random")
                 default_tags = gr.Dropdown(["disabled", "random"] + DEFAULT_TAGS, label="Default Tags", value="random")
-            with gr.Column():
                 roles = gr.Dropdown(["disabled", "random"] + ROLES, label="Roles", value="random")
                 hairstyles = gr.Dropdown(["disabled", "random"] + HAIRSTYLES, label="Hairstyles", value="random")
                 additional_details = gr.Dropdown(["disabled", "random"] + ADDITIONAL_DETAILS, label="Additional Details", value="random")
                 photography_styles = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHY_STYLES, label="Photography Styles", value="random")
+            with gr.Column():                
                 device = gr.Dropdown(["disabled", "random"] + DEVICE, label="Device", value="random")
                 photographer = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHER, label="Photographer", value="random")
-            with gr.Column():
                 artist = gr.Dropdown(["disabled", "random"] + ARTIST, label="Artist", value="random")
                 digital_artform = gr.Dropdown(["disabled", "random"] + DIGITAL_ARTFORM, label="Digital Artform", value="random")
                 place = gr.Dropdown(["disabled", "random"] + PLACE, label="Place", value="random")
@@ -368,17 +366,16 @@ def create_interface():
                 composition = gr.Dropdown(["disabled", "random"] + COMPOSITION, label="Composition", value="random")
                 pose = gr.Dropdown(["disabled", "random"] + POSE, label="Pose", value="random")
                 background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="random")
-
+            with gr.Column():
                 generate_button = gr.Button("Generate Prompt")
-                output = gr.Textbox(label="Generated Prompt")
-                t5xxl_output = gr.Textbox(label="T5XXL Output", visible=False)
-                clip_l_output = gr.Textbox(label="CLIP L Output", visible=False)
-                clip_g_output = gr.Textbox(label="CLIP G Output", visible=False)
+                output = gr.Textbox(label="Generated Prompt / Input Text", lines=5)
+                t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True)
+                clip_l_output = gr.Textbox(label="CLIP L Output", visible=True)
+                clip_g_output = gr.Textbox(label="CLIP G Output", visible=True)
 
             with gr.Column():
                 # HuggingFace Inference Text Generator inputs
                 model = gr.Dropdown(["Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Mixtral")
-                input_text = gr.Textbox(label="Input Text", lines=5)
                 happy_talk = gr.Checkbox(label="Happy Talk", value=True)
                 compress = gr.Checkbox(label="Compress", value=False)
                 compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="medium")
@@ -394,15 +391,11 @@ def create_interface():
                     additional_details, photography_styles, device, photographer, artist, digital_artform,
                     place, lighting, clothing, composition, pose, background],
             outputs=[output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
-        ).then(
-            lambda x: x,
-            inputs=[output],
-            outputs=[input_text]
         )
 
         generate_text_button.click(
             huggingface_node.generate,
-            inputs=[model, input_text, happy_talk, compress, compression_level, poster, custom_base_prompt],
+            inputs=[model, output, happy_talk, compress, compression_level, poster, custom_base_prompt],
             outputs=text_output
         )
 
