@@ -3,8 +3,8 @@ import random
 import json
 import os
 import re
-from openai import OpenAI
 from datetime import datetime
+from huggingface_hub import InferenceClient
 
 # Load JSON files
 def load_json_file(file_name):
@@ -259,14 +259,19 @@ class PromptGenerator:
 
         return self.process_string(replaced, seed)
 
-class GPT4MiniNode:
+class HuggingFaceInferenceNode:
     def __init__(self):
-        self.client = None
+        self.clients = {
+            "Mixtral": InferenceClient("NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO"),
+            "Mistral": InferenceClient("mistralai/Mistral-7B-Instruct-v0.3"),
+            "Llama": InferenceClient("meta-llama/Meta-Llama-3-8B-Instruct"),
+            "Mistral-Nemo": InferenceClient("mistralai/Mistral-Nemo-Instruct-2407")
+        }
         self.prompts_dir = "./prompts"
         os.makedirs(self.prompts_dir, exist_ok=True)
 
     def save_prompt(self, prompt):
-        filename_text = "mini_" + prompt.split(',')[0].strip()
+        filename_text = "hf_" + prompt.split(',')[0].strip()
         filename_text = re.sub(r'[^\w\-_\. ]', '_', filename_text)
         filename_text = filename_text[:30]  
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -278,9 +283,9 @@ class GPT4MiniNode:
         
         print(f"Prompt saved to {filename}")
 
-    def generate(self, api_key, input_text, happy_talk, compress, compression_level, poster, custom_base_prompt=""):
+    def generate(self, model, input_text, happy_talk, compress, compression_level, poster, custom_base_prompt=""):
         try:
-            self.client = OpenAI(api_key=api_key)
+            client = self.clients[model]
 
             default_happy_prompt = """Create a detailed visually descriptive caption of this description, which will be used as a prompt for a text to image AI system (caption only, no instructions like "create an image").Remove any mention of digital artwork or artwork style. Give detailed visual descriptions of the character(s), including ethnicity, skin tone, expression etc. Imagine using keywords for a still for someone who has aphantasia. Describe the image style, e.g. any photographic or art styles / techniques utilized. Make sure to fully describe all aspects of the cinematography, with abundant technical details and visual descriptions. If there is more than one image, combine the elements and characters from all of the images creatively into a single cohesive composition with a single background, inventing an interaction between the characters. Be creative in combining the characters into a single cohesive scene. Focus on two primary characters (or one) and describe an interesting interaction between them, such as a hug, a kiss, a fight, giving an object, an emotional reaction / interaction. If there is more than one background in the images, pick the most appropriate one. Your output is only the caption itself, no comments or extra formatting. The caption is in a single long paragraph. If you feel the images are inappropriate, invent a new scene / characters inspired by these. Additionally, incorporate a specific movie director's visual style (e.g. Wes Anderson, Christopher Nolan, Quentin Tarantino) and describe the lighting setup in detail, including the type, color, and placement of light sources to create the desired mood and atmosphere. Always frame the scene as a screen grab from a 35mm film still, including details about the film grain, color grading, and any artifacts or characteristics specific to 35mm film photography."""
 
@@ -295,23 +300,7 @@ Supporting characters: Describe the supporting characters
 Branding type: Describe the branding type
 Tagline: Include a tagline that captures the essence of the movie.
 Visual style: Ensure that the visual style fits the branding type and tagline.
-You are allowed to make up film and branding names, and do them like 80's, 90's or modern movie posters.
-
-Never add ** in front of title, main character, etc.
-Here is an example of a prompt, make the output like a movie poster: 
-Title: Display the title "Verdant Spirits" in elegant and ethereal text, placed centrally at the top of the poster.
-
-Main Character: Depict a serene and enchantingly beautiful woman with an aura of nature, her face partly adorned and encased with vibrant green foliage and delicate floral arrangements. She exudes an ethereal and mystical presence.
-
-Background: The background should feature a dreamlike enchanted forest with lush greenery, vibrant flowers, and an ethereal glow emanating from the foliage. The scene should feel magical and otherworldly, suggesting a hidden world within nature.
-
-Supporting Characters: Add an enigmatic skeletal figure entwined with glowing, bioluminescent leaves and plants, subtly blending with the dark, verdant background. This figure should evoke a sense of ancient wisdom and mysterious energy.
-
-Studio Ghibli Branding: Incorporate the Studio Ghibli logo at the bottom center of the poster to establish it as an official Ghibli film.
-
-Tagline: Include a tagline that reads: "Where Nature's Secrets Come to Life" prominently on the poster.
-
-Visual Style: Ensure the overall visual style is consistent with Studio Ghibli s signature look   rich, detailed backgrounds, and characters imbued with a touch of whimsy and mystery. The colors should be lush and inviting, with an emphasis on the enchanting and mystical aspects of nature."""
+You are allowed to make up film and branding names, and do them like 80's, 90's or modern movie posters."""
 
             if poster:
                 base_prompt = poster_prompt
@@ -329,21 +318,24 @@ Visual Style: Ensure the overall visual style is consistent with Studio Ghibli s
                 char_limit = compression_chars[compression_level]
                 base_prompt += f" Compress the output to be concise while retaining key visual details. MAX OUTPUT SIZE no more than {char_limit} characters."
 
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": f"{base_prompt}\nDescription: {input_text}"}],
-            )
+            messages = f"<|im_start|>system\nYou are OpenGPT 4o a helpful and very powerful chatbot web assistant made by KingNish. You are provided with WEB results from which you can find informations to answer users query in Structured, Better and in Human Way. You do not say Unnecesarry things. You are also Expert in every field and also learn and try to answer from contexts related to previous question. Try your best to give best response possible to user. You also try to show emotions using Emojis and reply in details like human, use short forms, friendly tone and emotions.<|im_end|>"
+            messages += f"\n<|im_start|>user\n{base_prompt}\nDescription: {input_text}<|im_end|>\n<|im_start|>assistant\n"
+
+            stream = client.text_generation(messages, max_new_tokens=4000, do_sample=True, stream=True, details=True, return_full_text=False)
+            output = ""
+            for response in stream:
+                if not response.token.text == "<|im_end|>":
+                    output += response.token.text
             
-            result = response.choices[0].message.content
-            self.save_prompt(result)
-            return result
+            self.save_prompt(output)
+            return output
         except Exception as e:
             print(f"An error occurred: {e}")
             return f"Error occurred while processing the request: {str(e)}"
 
 def create_interface():
     prompt_generator = PromptGenerator()
-    gpt4_mini_node = GPT4MiniNode()
+    huggingface_node = HuggingFaceInferenceNode()
 
     with gr.Blocks() as demo:
         gr.Markdown("# AI Prompt Generator and Text Generator")
@@ -389,8 +381,8 @@ def create_interface():
                 outputs=[output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
             )
 
-        with gr.Tab("GPT4 Mini Text Generator"):
-            api_key = gr.Textbox(label="OpenAI API Key", type="password", placeholder="Enter your OpenAI API key")
+        with gr.Tab("HuggingFace Inference Text Generator"):
+            model = gr.Dropdown(["Mixtral", "Mistral", "Llama", "Mistral-Nemo"], label="Model", value="Mixtral")
             input_text = gr.Textbox(label="Input Text", lines=5)
             happy_talk = gr.Checkbox(label="Happy Talk", value=True)
             compress = gr.Checkbox(label="Compress", value=False)
@@ -402,8 +394,8 @@ def create_interface():
             text_output = gr.Textbox(label="Generated Text", lines=10)
 
             generate_text_button.click(
-                gpt4_mini_node.generate,
-                inputs=[api_key, input_text, happy_talk, compress, compression_level, poster, custom_base_prompt],
+                huggingface_node.generate,
+                inputs=[model, input_text, happy_talk, compress, compression_level, poster, custom_base_prompt],
                 outputs=text_output
             )
 
