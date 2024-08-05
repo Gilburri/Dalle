@@ -444,10 +444,10 @@ def create_interface():
             
             with gr.Column(scale=2):
                 with gr.Accordion("Prompt Generation with LLM", open=False):
-                    model = gr.Dropdown(["Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Mixtral")
+                    model = gr.Dropdown(["Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Llama 3")
                     happy_talk = gr.Checkbox(label="Happy Talk", value=True)
-                    compress = gr.Checkbox(label="Compress", value=False)
-                    compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="medium")
+                    compress = gr.Checkbox(label="Compress", value=True)
+                    compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="soft")
                     poster = gr.Checkbox(label="Poster", value=False)
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
                 generate_text_button = gr.Button("Generate Prompt with LLM")
