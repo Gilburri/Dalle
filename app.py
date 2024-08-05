@@ -318,7 +318,7 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                 char_limit = compression_chars[compression_level]
                 base_prompt += f" Compress the output to be concise while retaining key visual details. MAX OUTPUT SIZE no more than {char_limit} characters."
 
-            messages = f"<|im_start|>system\nYou are OpenGPT 4o a helpful and very powerful chatbot web assistant made by KingNish. You are provided with WEB results from which you can find informations to answer users query in Structured, Better and in Human Way. You do not say Unnecesarry things. You are also Expert in every field and also learn and try to answer from contexts related to previous question. Try your best to give best response possible to user. You also try to show emotions using Emojis and reply in details like human, use short forms, friendly tone and emotions.<|im_end|>"
+            messages = f"<|im_start|>system\nYou are a helpful assistant. Try your best to give best response possible to user.<|im_end|>"
             messages += f"\n<|im_start|>user\n{base_prompt}\nDescription: {input_text}<|im_end|>\n<|im_start|>assistant\n"
 
             stream = client.text_generation(messages, max_new_tokens=4000, do_sample=True, stream=True, details=True, return_full_text=False)
