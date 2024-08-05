@@ -400,21 +400,21 @@ def create_interface():
                     artform = gr.Dropdown(["disabled"] + ARTFORM, label="Artform", value="disabled")
                     photo_type = gr.Dropdown(["disabled"] + PHOTO_TYPE, label="Photo Type", value="disabled")
 
-                with gr.Accordion("Character Details", value=False):
+                with gr.Accordion("Character Details", open=False):
                     body_types = gr.Dropdown(["disabled"] + BODY_TYPES, label="Body Types", value="disabled")
                     default_tags = gr.Dropdown(["disabled"] + DEFAULT_TAGS, label="Default Tags", value="disabled")
                     roles = gr.Dropdown(["disabled"] + ROLES, label="Roles", value="disabled")
                     hairstyles = gr.Dropdown(["disabled"] + HAIRSTYLES, label="Hairstyles", value="disabled")
                     clothing = gr.Dropdown(["disabled"] + CLOTHING, label="Clothing", value="disabled")
 
-                with gr.Accordion("Scene Details", value=False):
+                with gr.Accordion("Scene Details", open=False):
                     place = gr.Dropdown(["disabled"] + PLACE, label="Place", value="disabled")
                     lighting = gr.Dropdown(["disabled"] + LIGHTING, label="Lighting", value="disabled")
                     composition = gr.Dropdown(["disabled"] + COMPOSITION, label="Composition", value="disabled")
                     pose = gr.Dropdown(["disabled"] + POSE, label="Pose", value="disabled")
                     background = gr.Dropdown(["disabled"] + BACKGROUND, label="Background", value="disabled")
 
-                with gr.Accordion("Style and Artist", value=False):
+                with gr.Accordion("Style and Artist", open=False):
                     additional_details = gr.Dropdown(["disabled"] + ADDITIONAL_DETAILS, label="Additional Details", value="disabled")
                     photography_styles = gr.Dropdown(["disabled"] + PHOTOGRAPHY_STYLES, label="Photography Styles", value="disabled")
                     device = gr.Dropdown(["disabled"] + DEVICE, label="Device", value="disabled")
