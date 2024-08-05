@@ -397,6 +397,8 @@ def create_interface():
                     seed = gr.Number(label="Seed", value=0)
                     custom = gr.Textbox(label="Custom")
                     subject = gr.Textbox(label="Subject")
+                
+                with gr.Accordion("Artform and Photo Type", open=False):
                     artform = gr.Dropdown(["disabled"] + ARTFORM, label="Artform", value="disabled")
                     photo_type = gr.Dropdown(["disabled"] + PHOTO_TYPE, label="Photo Type", value="disabled")
 
@@ -421,15 +423,17 @@ def create_interface():
                     photographer = gr.Dropdown(["disabled"] + PHOTOGRAPHER, label="Photographer", value="disabled")
                     artist = gr.Dropdown(["disabled"] + ARTIST, label="Artist", value="disabled")
                     digital_artform = gr.Dropdown(["disabled"] + DIGITAL_ARTFORM, label="Digital Artform", value="disabled")
+                
+                generate_button = gr.Button("Generate Prompt")
 
             with gr.Column(scale=2):
-                with gr.Accordion("Image and Caption", open=True):
+                with gr.Accordion("Image and Caption", open=False):
                     input_image = gr.Image(label="Input Image (optional)")
                     caption_output = gr.Textbox(label="Generated Caption", lines=3)
                     create_caption_button = gr.Button("Create Caption")
 
                 with gr.Accordion("Prompt Generation", open=True):
-                    generate_button = gr.Button("Generate Prompt")
+                    
                     output = gr.Textbox(label="Generated Prompt / Input Text", lines=5)
                     add_caption_button = gr.Button("Add Caption to Prompt")
                     t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True)
@@ -437,15 +441,15 @@ def create_interface():
                     clip_g_output = gr.Textbox(label="CLIP G Output", visible=True)
             
             with gr.Column(scale=2):
-                with gr.Accordion("Text Generation", open=True):
+                with gr.Accordion("Prompt Generation with LLM", open=False):
                     model = gr.Dropdown(["Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Mixtral")
                     happy_talk = gr.Checkbox(label="Happy Talk", value=True)
                     compress = gr.Checkbox(label="Compress", value=False)
                     compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="medium")
                     poster = gr.Checkbox(label="Poster", value=False)
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
-                    generate_text_button = gr.Button("Generate Text")
-                    text_output = gr.Textbox(label="Generated Text", lines=10)
+                generate_text_button = gr.Button("Generate Text")
+                text_output = gr.Textbox(label="Generated Text", lines=10)
 
         def create_caption(image):
             if image is not None:
