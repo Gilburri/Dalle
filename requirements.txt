@@ -1,1 +1,3 @@
-openai
+spaces
+transformers
+timm
