@@ -98,7 +98,12 @@ class PromptGenerator:
 
         return original, seed, t5xxl, clip_l, clip_g
 
-    def generate_prompt(self, **kwargs):
+    def generate_prompt(self, seed, custom, subject, artform, photo_type, body_types, default_tags, roles, hairstyles,
+                        additional_details, photography_styles, device, photographer, artist, digital_artform,
+                        place, lighting, clothing, composition, pose, background):
+        kwargs = locals()
+        del kwargs['self']
+        
         seed = kwargs.get("seed", 0)
         if seed is not None:
             self.rng = random.Random(seed)
