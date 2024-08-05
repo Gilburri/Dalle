@@ -367,39 +367,44 @@ def create_interface():
                     clothing = gr.Dropdown(["disabled", "random"] + CLOTHING, label="Clothing", value="random")
                     composition = gr.Dropdown(["disabled", "random"] + COMPOSITION, label="Composition", value="random")
                     pose = gr.Dropdown(["disabled", "random"] + POSE, label="Pose", value="random")
-                    background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="random")
+                              background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="random")
 
-            generate_button = gr.Button("Generate Prompt")
-            output = gr.Textbox(label="Generated Prompt")
-            t5xxl_output = gr.Textbox(label="T5XXL Output")
-            clip_l_output = gr.Textbox(label="CLIP L Output")
-            clip_g_output = gr.Textbox(label="CLIP G Output")
+                generate_button = gr.Button("Generate Prompt")
+                output = gr.Textbox(label="Generated Prompt")
+                t5xxl_output = gr.Textbox(label="T5XXL Output", visible=False)
+                clip_l_output = gr.Textbox(label="CLIP L Output", visible=False)
+                clip_g_output = gr.Textbox(label="CLIP G Output", visible=False)
 
-            generate_button.click(
-                prompt_generator.generate_prompt,
-                inputs=[seed, custom, subject, artform, photo_type, body_types, default_tags, roles, hairstyles,
-                        additional_details, photography_styles, device, photographer, artist, digital_artform,
-                        place, lighting, clothing, composition, pose, background],
-                outputs=[output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
-            )
+            with gr.Column():
+                # HuggingFace Inference Text Generator inputs
+                model = gr.Dropdown(["Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Mixtral")
+                input_text = gr.Textbox(label="Input Text", lines=5)
+                happy_talk = gr.Checkbox(label="Happy Talk", value=True)
+                compress = gr.Checkbox(label="Compress", value=False)
+                compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="medium")
+                poster = gr.Checkbox(label="Poster", value=False)
+                custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
 
-        with gr.Tab("HuggingFace Inference Text Generator"):
-            model = gr.Dropdown(["Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Mixtral")
-            input_text = gr.Textbox(label="Input Text", lines=5)
-            happy_talk = gr.Checkbox(label="Happy Talk", value=True)
-            compress = gr.Checkbox(label="Compress", value=False)
-            compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="medium")
-            poster = gr.Checkbox(label="Poster", value=False)
-            custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
+                generate_text_button = gr.Button("Generate Text")
+                text_output = gr.Textbox(label="Generated Text", lines=10)
 
-            generate_text_button = gr.Button("Generate Text")
-            text_output = gr.Textbox(label="Generated Text", lines=10)
+        generate_button.click(
+            prompt_generator.generate_prompt,
+            inputs=[seed, custom, subject, artform, photo_type, body_types, default_tags, roles, hairstyles,
+                    additional_details, photography_styles, device, photographer, artist, digital_artform,
+                    place, lighting, clothing, composition, pose, background],
+            outputs=[output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
+        ).then(
+            lambda x: x,
+            inputs=[output],
+            outputs=[input_text]
+        )
 
-            generate_text_button.click(
-                huggingface_node.generate,
-                inputs=[model, input_text, happy_talk, compress, compression_level, poster, custom_base_prompt],
-                outputs=text_output
-            )
+        generate_text_button.click(
+            huggingface_node.generate,
+            inputs=[model, input_text, happy_talk, compress, compression_level, poster, custom_base_prompt],
+            outputs=text_output
+        )
 
     return demo
 
