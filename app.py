@@ -399,7 +399,7 @@ def create_interface():
                     subject = gr.Textbox(label="Subject (optional)")
                     
                     # Add the radio button for global option selection
-                    global_option = gr.Radio(["disabled", "random"], label="Set all options to:", value="disabled")
+                    global_option = gr.Radio(["disabled", "random"], label="Set all options to:", value="random")
                 
                 with gr.Accordion("Artform and Photo Type", open=False):
                     artform = gr.Dropdown(["disabled", "random"] + ARTFORM, label="Artform", value="disabled")
