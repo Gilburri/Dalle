@@ -395,8 +395,8 @@ def create_interface():
             with gr.Column(scale=2):
                 with gr.Accordion("Basic Settings"):
                     seed = gr.Number(label="Seed", value=0)
-                    custom = gr.Textbox(label="Custom")
-                    subject = gr.Textbox(label="Subject")
+                    custom = gr.Textbox(label="Custom Input Prompt (optional)")
+                    subject = gr.Textbox(label="Subject (optional)")
                 
                 with gr.Accordion("Artform and Photo Type", open=False):
                     artform = gr.Dropdown(["disabled"] + ARTFORM, label="Artform", value="disabled")
@@ -431,11 +431,11 @@ def create_interface():
                     input_image = gr.Image(label="Input Image (optional)")
                     caption_output = gr.Textbox(label="Generated Caption", lines=3)
                     create_caption_button = gr.Button("Create Caption")
+                    add_caption_button = gr.Button("Add Caption to Prompt")
 
                 with gr.Accordion("Prompt Generation", open=True):
                     
-                    output = gr.Textbox(label="Generated Prompt / Input Text", lines=5)
-                    add_caption_button = gr.Button("Add Caption to Prompt")
+                    output = gr.Textbox(label="Generated Prompt / Input Text", lines=4)
                     t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True)
                     clip_l_output = gr.Textbox(label="CLIP L Output", visible=True)
                     clip_g_output = gr.Textbox(label="CLIP G Output", visible=True)
@@ -448,7 +448,7 @@ def create_interface():
                     compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="medium")
                     poster = gr.Checkbox(label="Poster", value=False)
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
-                generate_text_button = gr.Button("Generate Text")
+                generate_text_button = gr.Button("Generate Prompt with LLM")
                 text_output = gr.Textbox(label="Generated Text", lines=10)
 
         def create_caption(image):
