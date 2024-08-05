@@ -297,7 +297,7 @@ class PromptGenerator:
     
     def add_caption_to_prompt(self, prompt, caption):
         if caption:
-            return f"{prompt} {caption}"
+            return f"{prompt}, {caption}"
         return prompt
 
 class HuggingFaceInferenceNode:
@@ -378,55 +378,63 @@ def create_interface():
     prompt_generator = PromptGenerator()
     huggingface_node = HuggingFaceInferenceNode()
 
-    with gr.Blocks() as demo:
+    with gr.Blocks(theme='bethecloud/storj_theme') as demo:
         gr.Markdown("# AI Prompt Generator and Text Generator")
 
         with gr.Row():
-            with gr.Column():
-                seed = gr.Number(label="Seed", value=0)
-                custom = gr.Textbox(label="Custom")
-                subject = gr.Textbox(label="Subject")
-                artform = gr.Dropdown(["disabled", "random"] + ARTFORM, label="Artform", value="photography")
-                photo_type = gr.Dropdown(["disabled", "random"] + PHOTO_TYPE, label="Photo Type", value="random")
-                body_types = gr.Dropdown(["disabled", "random"] + BODY_TYPES, label="Body Types", value="random")
-                default_tags = gr.Dropdown(["disabled", "random"] + DEFAULT_TAGS, label="Default Tags", value="random")
-                roles = gr.Dropdown(["disabled", "random"] + ROLES, label="Roles", value="random")
-                hairstyles = gr.Dropdown(["disabled", "random"] + HAIRSTYLES, label="Hairstyles", value="random")
-                additional_details = gr.Dropdown(["disabled", "random"] + ADDITIONAL_DETAILS, label="Additional Details", value="random")
-                photography_styles = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHY_STYLES, label="Photography Styles", value="random")
-            with gr.Column():                
-                device = gr.Dropdown(["disabled", "random"] + DEVICE, label="Device", value="random")
-                photographer = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHER, label="Photographer", value="random")
-                artist = gr.Dropdown(["disabled", "random"] + ARTIST, label="Artist", value="random")
-                digital_artform = gr.Dropdown(["disabled", "random"] + DIGITAL_ARTFORM, label="Digital Artform", value="random")
-                place = gr.Dropdown(["disabled", "random"] + PLACE, label="Place", value="random")
-                lighting = gr.Dropdown(["disabled", "random"] + LIGHTING, label="Lighting", value="random")
-                clothing = gr.Dropdown(["disabled", "random"] + CLOTHING, label="Clothing", value="random")
-                composition = gr.Dropdown(["disabled", "random"] + COMPOSITION, label="Composition", value="random")
-                pose = gr.Dropdown(["disabled", "random"] + POSE, label="Pose", value="random")
-                background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="random")
-            with gr.Column():
-                input_image = gr.Image(label="Input Image (optional)")
-                caption_output = gr.Textbox(label="Generated Caption", lines=3)
-                create_caption_button = gr.Button("Create Caption")
-                generate_button = gr.Button("Generate Prompt")
-                output = gr.Textbox(label="Generated Prompt / Input Text", lines=5)
-                add_caption_button = gr.Button("Add Caption to Prompt")
-                t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True)
-                clip_l_output = gr.Textbox(label="CLIP L Output", visible=True)
-                clip_g_output = gr.Textbox(label="CLIP G Output", visible=True)
+            with gr.Column(scale=2):
+                with gr.Accordion("Basic Settings"):
+                    seed = gr.Number(label="Seed", value=0)
+                    custom = gr.Textbox(label="Custom")
+                    subject = gr.Textbox(label="Subject")
+                    artform = gr.Dropdown(["disabled", "random"] + ARTFORM, label="Artform", value="photography")
+                    photo_type = gr.Dropdown(["disabled", "random"] + PHOTO_TYPE, label="Photo Type", value="random")
 
-            with gr.Column():
-                # HuggingFace Inference Text Generator inputs
-                model = gr.Dropdown(["Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Mixtral")
-                happy_talk = gr.Checkbox(label="Happy Talk", value=True)
-                compress = gr.Checkbox(label="Compress", value=False)
-                compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="medium")
-                poster = gr.Checkbox(label="Poster", value=False)
-                custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
+                with gr.Accordion("Character Details"):
+                    body_types = gr.Dropdown(["disabled", "random"] + BODY_TYPES, label="Body Types", value="random")
+                    default_tags = gr.Dropdown(["disabled", "random"] + DEFAULT_TAGS, label="Default Tags", value="random")
+                    roles = gr.Dropdown(["disabled", "random"] + ROLES, label="Roles", value="random")
+                    hairstyles = gr.Dropdown(["disabled", "random"] + HAIRSTYLES, label="Hairstyles", value="random")
+                    clothing = gr.Dropdown(["disabled", "random"] + CLOTHING, label="Clothing", value="random")
 
-                generate_text_button = gr.Button("Generate Text")
-                text_output = gr.Textbox(label="Generated Text", lines=10)
+                with gr.Accordion("Scene Details"):
+                    place = gr.Dropdown(["disabled", "random"] + PLACE, label="Place", value="random")
+                    lighting = gr.Dropdown(["disabled", "random"] + LIGHTING, label="Lighting", value="random")
+                    composition = gr.Dropdown(["disabled", "random"] + COMPOSITION, label="Composition", value="random")
+                    pose = gr.Dropdown(["disabled", "random"] + POSE, label="Pose", value="random")
+                    background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="random")
+
+                with gr.Accordion("Style and Artist"):
+                    additional_details = gr.Dropdown(["disabled", "random"] + ADDITIONAL_DETAILS, label="Additional Details", value="random")
+                    photography_styles = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHY_STYLES, label="Photography Styles", value="random")
+                    device = gr.Dropdown(["disabled", "random"] + DEVICE, label="Device", value="random")
+                    photographer = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHER, label="Photographer", value="random")
+                    artist = gr.Dropdown(["disabled", "random"] + ARTIST, label="Artist", value="random")
+                    digital_artform = gr.Dropdown(["disabled", "random"] + DIGITAL_ARTFORM, label="Digital Artform", value="random")
+
+            with gr.Column(scale=3):
+                with gr.Accordion("Image and Caption", open=True):
+                    input_image = gr.Image(label="Input Image (optional)")
+                    caption_output = gr.Textbox(label="Generated Caption", lines=3)
+                    create_caption_button = gr.Button("Create Caption")
+
+                with gr.Accordion("Prompt Generation", open=True):
+                    generate_button = gr.Button("Generate Prompt")
+                    output = gr.Textbox(label="Generated Prompt / Input Text", lines=5)
+                    add_caption_button = gr.Button("Add Caption to Prompt")
+                    t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True)
+                    clip_l_output = gr.Textbox(label="CLIP L Output", visible=True)
+                    clip_g_output = gr.Textbox(label="CLIP G Output", visible=True)
+
+                with gr.Accordion("Text Generation", open=True):
+                    model = gr.Dropdown(["Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Mixtral")
+                    happy_talk = gr.Checkbox(label="Happy Talk", value=True)
+                    compress = gr.Checkbox(label="Compress", value=False)
+                    compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="medium")
+                    poster = gr.Checkbox(label="Poster", value=False)
+                    custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
+                    generate_text_button = gr.Button("Generate Text")
+                    text_output = gr.Textbox(label="Generated Text", lines=10)
 
         def create_caption(image):
             if image is not None:
