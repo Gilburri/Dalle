@@ -397,6 +397,9 @@ def create_interface():
                     seed = gr.Number(label="Seed", value=0)
                     custom = gr.Textbox(label="Custom Input Prompt (optional)")
                     subject = gr.Textbox(label="Subject (optional)")
+                    
+                    # Add the radio button for global option selection
+                    global_option = gr.Radio(["disabled", "random"], label="Set all options to:", value="disabled")
                 
                 with gr.Accordion("Artform and Photo Type", open=False):
                     artform = gr.Dropdown(["disabled", "random"] + ARTFORM, label="Artform", value="disabled")
@@ -434,7 +437,6 @@ def create_interface():
                     add_caption_button = gr.Button("Add Caption to Prompt")
 
                 with gr.Accordion("Prompt Generation", open=True):
-                    
                     output = gr.Textbox(label="Generated Prompt / Input Text", lines=4)
                     t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True)
                     clip_l_output = gr.Textbox(label="CLIP L Output", visible=True)
@@ -480,6 +482,23 @@ def create_interface():
             huggingface_node.generate,
             inputs=[model, output, happy_talk, compress, compression_level, poster, custom_base_prompt],
             outputs=text_output
+        )
+
+        def update_all_options(choice):
+            return {dropdown: gr.update(value=choice) for dropdown in [
+                artform, photo_type, body_types, default_tags, roles, hairstyles, clothing,
+                place, lighting, composition, pose, background, additional_details,
+                photography_styles, device, photographer, artist, digital_artform
+            ]}
+
+        global_option.change(
+            update_all_options,
+            inputs=[global_option],
+            outputs=[
+                artform, photo_type, body_types, default_tags, roles, hairstyles, clothing,
+                place, lighting, composition, pose, background, additional_details,
+                photography_styles, device, photographer, artist, digital_artform
+            ]
         )
 
     return demo
