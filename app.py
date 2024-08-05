@@ -288,16 +288,17 @@ class PromptGenerator:
                 components.append(f"by {self.get_choice(kwargs.get('artist', ''), ARTIST)}")
         components.append("BREAK_CLIPL")
 
-        if input_image is not None:
-            caption = florence_caption(input_image)
-            components.append(f" {caption}")
-
         prompt = " ".join(components)
         prompt = re.sub(" +", " ", prompt)
         replaced = prompt.replace("of as", "of")
         replaced = self.clean_consecutive_commas(replaced)
 
         return self.process_string(replaced, seed)
+    
+    def add_caption_to_prompt(self, prompt, caption):
+        if caption:
+            return f"{prompt} {caption}"
+        return prompt
 
 class HuggingFaceInferenceNode:
     def __init__(self):
@@ -406,8 +407,11 @@ def create_interface():
                 background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="random")
             with gr.Column():
                 input_image = gr.Image(label="Input Image (optional)")
+                caption_output = gr.Textbox(label="Generated Caption", lines=3)
+                create_caption_button = gr.Button("Create Caption")
                 generate_button = gr.Button("Generate Prompt")
                 output = gr.Textbox(label="Generated Prompt / Input Text", lines=5)
+                add_caption_button = gr.Button("Add Caption to Prompt")
                 t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True)
                 clip_l_output = gr.Textbox(label="CLIP L Output", visible=True)
                 clip_g_output = gr.Textbox(label="CLIP G Output", visible=True)
@@ -424,12 +428,29 @@ def create_interface():
                 generate_text_button = gr.Button("Generate Text")
                 text_output = gr.Textbox(label="Generated Text", lines=10)
 
+        def create_caption(image):
+            if image is not None:
+                return florence_caption(image)
+            return ""
+
+        create_caption_button.click(
+            create_caption,
+            inputs=[input_image],
+            outputs=[caption_output]
+        )
+
         generate_button.click(
             prompt_generator.generate_prompt,
             inputs=[seed, custom, subject, artform, photo_type, body_types, default_tags, roles, hairstyles,
                     additional_details, photography_styles, device, photographer, artist, digital_artform,
-                    place, lighting, clothing, composition, pose, background, input_image],
+                    place, lighting, clothing, composition, pose, background],
             outputs=[output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
+        )
+
+        add_caption_button.click(
+            prompt_generator.add_caption_to_prompt,
+            inputs=[output, caption_output],
+            outputs=[output]
         )
 
         generate_text_button.click(
