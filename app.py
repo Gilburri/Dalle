@@ -374,12 +374,22 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
             print(f"An error occurred: {e}")
             return f"Error occurred while processing the request: {str(e)}"
 
+title = """<h1 align="center">FLUX Prompt Generator</h1>
+<p><center>
+<a href="https://github.com/dagthomas/comfyui_dagthomas" target="_blank">[comfyui_dagthomas]</a>
+<a href="https://github.com/dagthomas" target="_blank">[dagthomas Github]</a>
+
+<p align="center">Create long prompts from images or simple words. Enhance your short prompts with prompt enhancer.</p>
+</center></p>
+"""
+
 def create_interface():
     prompt_generator = PromptGenerator()
     huggingface_node = HuggingFaceInferenceNode()
 
     with gr.Blocks(theme='bethecloud/storj_theme') as demo:
-        gr.Markdown("# AI Prompt Generator and Text Generator")
+        
+        gr.HTML(title)
 
         with gr.Row():
             with gr.Column(scale=2):
