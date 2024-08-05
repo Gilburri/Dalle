@@ -5,9 +5,43 @@ import os
 import re
 from datetime import datetime
 from huggingface_hub import InferenceClient
+import subprocess
+import torch
+from PIL import Image
+from transformers import AutoProcessor, AutoModelForCausalLM
 
+subprocess.run('pip install flash-attn --no-build-isolation', env={'FLASH_ATTENTION_SKIP_CUDA_BUILD': "TRUE"}, shell=True)
 
 huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
+
+
+# Initialize Florence model
+device = "cuda" if torch.cuda.is_available() else "cpu"
+florence_model = AutoModelForCausalLM.from_pretrained('microsoft/Florence-2-base', trust_remote_code=True).to(device).eval()
+florence_processor = AutoProcessor.from_pretrained('microsoft/Florence-2-base', trust_remote_code=True)
+
+# Florence caption function
+def florence_caption(image):
+    if not isinstance(image, Image.Image):
+        image = Image.fromarray(image)
+    
+    inputs = florence_processor(text="<MORE_DETAILED_CAPTION>", images=image, return_tensors="pt").to(device)
+    generated_ids = florence_model.generate(
+        input_ids=inputs["input_ids"],
+        pixel_values=inputs["pixel_values"],
+        max_new_tokens=1024,
+        early_stopping=False,
+        do_sample=False,
+        num_beams=3,
+    )
+    generated_text = florence_processor.batch_decode(generated_ids, skip_special_tokens=False)[0]
+    parsed_answer = florence_processor.post_process_generation(
+        generated_text,
+        task="<MORE_DETAILED_CAPTION>",
+        image_size=(image.width, image.height)
+    )
+    return parsed_answer["<MORE_DETAILED_CAPTION>"]
+    
 # Load JSON files
 def load_json_file(file_name):
     file_path = os.path.join("data", file_name)
@@ -102,7 +136,7 @@ class PromptGenerator:
 
     def generate_prompt(self, seed, custom, subject, artform, photo_type, body_types, default_tags, roles, hairstyles,
                         additional_details, photography_styles, device, photographer, artist, digital_artform,
-                        place, lighting, clothing, composition, pose, background):
+                        place, lighting, clothing, composition, pose, background, input_image):
         kwargs = locals()
         del kwargs['self']
         
@@ -254,6 +288,10 @@ class PromptGenerator:
                 components.append(f"by {self.get_choice(kwargs.get('artist', ''), ARTIST)}")
         components.append("BREAK_CLIPL")
 
+        if input_image is not None:
+            caption = florence_caption(input_image)
+            components.append(f" {caption}")
+
         prompt = " ".join(components)
         prompt = re.sub(" +", " ", prompt)
         replaced = prompt.replace("of as", "of")
@@ -367,6 +405,7 @@ def create_interface():
                 pose = gr.Dropdown(["disabled", "random"] + POSE, label="Pose", value="random")
                 background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="random")
             with gr.Column():
+                input_image = gr.Image(label="Input Image (optional)")
                 generate_button = gr.Button("Generate Prompt")
                 output = gr.Textbox(label="Generated Prompt / Input Text", lines=5)
                 t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True)
@@ -389,7 +428,7 @@ def create_interface():
             prompt_generator.generate_prompt,
             inputs=[seed, custom, subject, artform, photo_type, body_types, default_tags, roles, hairstyles,
                     additional_details, photography_styles, device, photographer, artist, digital_artform,
-                    place, lighting, clothing, composition, pose, background],
+                    place, lighting, clothing, composition, pose, background, input_image],
             outputs=[output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
         )
 
