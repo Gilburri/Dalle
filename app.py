@@ -367,7 +367,7 @@ def create_interface():
                 clothing = gr.Dropdown(["disabled", "random"] + CLOTHING, label="Clothing", value="random")
                 composition = gr.Dropdown(["disabled", "random"] + COMPOSITION, label="Composition", value="random")
                 pose = gr.Dropdown(["disabled", "random"] + POSE, label="Pose", value="random")
-                          background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="random")
+                background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="random")
 
                 generate_button = gr.Button("Generate Prompt")
                 output = gr.Textbox(label="Generated Prompt")
