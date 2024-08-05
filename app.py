@@ -1,9 +1,11 @@
+from datetime import datetime
 import gradio as gr
 import random
 import json
 import os
 import re
 from openai import OpenAI
+import da
 
 # Load JSON files
 def load_json_file(file_name):
@@ -255,7 +257,7 @@ class PromptGenerator:
 
 class GPT4MiniNode:
     def __init__(self):
-        self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        self.client = None
         self.prompts_dir = "./prompts"
         os.makedirs(self.prompts_dir, exist_ok=True)
 
