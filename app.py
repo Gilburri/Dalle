@@ -399,30 +399,30 @@ def create_interface():
                     subject = gr.Textbox(label="Subject (optional)")
                 
                 with gr.Accordion("Artform and Photo Type", open=False):
-                    artform = gr.Dropdown(["disabled"] + ARTFORM, label="Artform", value="disabled")
-                    photo_type = gr.Dropdown(["disabled"] + PHOTO_TYPE, label="Photo Type", value="disabled")
-
+                    artform = gr.Dropdown(["disabled", "random"] + ARTFORM, label="Artform", value="disabled")
+                    photo_type = gr.Dropdown(["disabled", "random"] + PHOTO_TYPE, label="Photo Type", value="disabled")
+            
                 with gr.Accordion("Character Details", open=False):
-                    body_types = gr.Dropdown(["disabled"] + BODY_TYPES, label="Body Types", value="disabled")
-                    default_tags = gr.Dropdown(["disabled"] + DEFAULT_TAGS, label="Default Tags", value="disabled")
-                    roles = gr.Dropdown(["disabled"] + ROLES, label="Roles", value="disabled")
-                    hairstyles = gr.Dropdown(["disabled"] + HAIRSTYLES, label="Hairstyles", value="disabled")
-                    clothing = gr.Dropdown(["disabled"] + CLOTHING, label="Clothing", value="disabled")
-
+                    body_types = gr.Dropdown(["disabled", "random"] + BODY_TYPES, label="Body Types", value="disabled")
+                    default_tags = gr.Dropdown(["disabled", "random"] + DEFAULT_TAGS, label="Default Tags", value="disabled")
+                    roles = gr.Dropdown(["disabled", "random"] + ROLES, label="Roles", value="disabled")
+                    hairstyles = gr.Dropdown(["disabled", "random"] + HAIRSTYLES, label="Hairstyles", value="disabled")
+                    clothing = gr.Dropdown(["disabled", "random"] + CLOTHING, label="Clothing", value="disabled")
+            
                 with gr.Accordion("Scene Details", open=False):
-                    place = gr.Dropdown(["disabled"] + PLACE, label="Place", value="disabled")
-                    lighting = gr.Dropdown(["disabled"] + LIGHTING, label="Lighting", value="disabled")
-                    composition = gr.Dropdown(["disabled"] + COMPOSITION, label="Composition", value="disabled")
-                    pose = gr.Dropdown(["disabled"] + POSE, label="Pose", value="disabled")
-                    background = gr.Dropdown(["disabled"] + BACKGROUND, label="Background", value="disabled")
-
+                    place = gr.Dropdown(["disabled", "random"] + PLACE, label="Place", value="disabled")
+                    lighting = gr.Dropdown(["disabled", "random"] + LIGHTING, label="Lighting", value="disabled")
+                    composition = gr.Dropdown(["disabled", "random"] + COMPOSITION, label="Composition", value="disabled")
+                    pose = gr.Dropdown(["disabled", "random"] + POSE, label="Pose", value="disabled")
+                    background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="disabled")
+            
                 with gr.Accordion("Style and Artist", open=False):
-                    additional_details = gr.Dropdown(["disabled"] + ADDITIONAL_DETAILS, label="Additional Details", value="disabled")
-                    photography_styles = gr.Dropdown(["disabled"] + PHOTOGRAPHY_STYLES, label="Photography Styles", value="disabled")
-                    device = gr.Dropdown(["disabled"] + DEVICE, label="Device", value="disabled")
-                    photographer = gr.Dropdown(["disabled"] + PHOTOGRAPHER, label="Photographer", value="disabled")
-                    artist = gr.Dropdown(["disabled"] + ARTIST, label="Artist", value="disabled")
-                    digital_artform = gr.Dropdown(["disabled"] + DIGITAL_ARTFORM, label="Digital Artform", value="disabled")
+                    additional_details = gr.Dropdown(["disabled", "random"] + ADDITIONAL_DETAILS, label="Additional Details", value="disabled")
+                    photography_styles = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHY_STYLES, label="Photography Styles", value="disabled")
+                    device = gr.Dropdown(["disabled", "random"] + DEVICE, label="Device", value="disabled")
+                    photographer = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHER, label="Photographer", value="disabled")
+                    artist = gr.Dropdown(["disabled", "random"] + ARTIST, label="Artist", value="disabled")
+                    digital_artform = gr.Dropdown(["disabled", "random"] + DIGITAL_ARTFORM, label="Digital Artform", value="disabled")
                 
                 generate_button = gr.Button("Generate Prompt")
 
