@@ -264,7 +264,6 @@ class PromptGenerator:
 class HuggingFaceInferenceNode:
     def __init__(self):
         self.clients = {
-            "Llama 3.1": InferenceClient("meta-llama/Meta-Llama-3.1-8B-Instruct", token=huggingface_token),
             "Mixtral": InferenceClient("NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO"),
             "Mistral": InferenceClient("mistralai/Mistral-7B-Instruct-v0.3"),
             "Llama 3": InferenceClient("meta-llama/Meta-Llama-3-8B-Instruct"),
@@ -385,7 +384,7 @@ def create_interface():
             )
 
         with gr.Tab("HuggingFace Inference Text Generator"):
-            model = gr.Dropdown(["Llama 3.1", "Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Llama 3.1")
+            model = gr.Dropdown(["Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Mixtral")
             input_text = gr.Textbox(label="Input Text", lines=5)
             happy_talk = gr.Checkbox(label="Happy Talk", value=True)
             compress = gr.Checkbox(label="Compress", value=False)
