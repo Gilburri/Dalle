@@ -342,7 +342,7 @@ def create_interface():
     with gr.Blocks() as demo:
         gr.Markdown("# AI Prompt Generator and Text Generator")
 
-        with gr.Tab("Prompt Generator"):
+        with gr.Row():
 
             with gr.Column():
                 seed = gr.Number(label="Seed", value=0)
