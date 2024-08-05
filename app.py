@@ -387,32 +387,32 @@ def create_interface():
                     seed = gr.Number(label="Seed", value=0)
                     custom = gr.Textbox(label="Custom")
                     subject = gr.Textbox(label="Subject")
-                    artform = gr.Dropdown(["disabled", "random"] + ARTFORM, label="Artform", value="photography")
-                    photo_type = gr.Dropdown(["disabled", "random"] + PHOTO_TYPE, label="Photo Type", value="random")
+                    artform = gr.Dropdown(["disabled"] + ARTFORM, label="Artform", value="disabled")
+                    photo_type = gr.Dropdown(["disabled"] + PHOTO_TYPE, label="Photo Type", value="disabled")
 
-                with gr.Accordion("Character Details"):
-                    body_types = gr.Dropdown(["disabled", "random"] + BODY_TYPES, label="Body Types", value="random")
-                    default_tags = gr.Dropdown(["disabled", "random"] + DEFAULT_TAGS, label="Default Tags", value="random")
-                    roles = gr.Dropdown(["disabled", "random"] + ROLES, label="Roles", value="random")
-                    hairstyles = gr.Dropdown(["disabled", "random"] + HAIRSTYLES, label="Hairstyles", value="random")
-                    clothing = gr.Dropdown(["disabled", "random"] + CLOTHING, label="Clothing", value="random")
+                with gr.Accordion("Character Details", value=False):
+                    body_types = gr.Dropdown(["disabled"] + BODY_TYPES, label="Body Types", value="disabled")
+                    default_tags = gr.Dropdown(["disabled"] + DEFAULT_TAGS, label="Default Tags", value="disabled")
+                    roles = gr.Dropdown(["disabled"] + ROLES, label="Roles", value="disabled")
+                    hairstyles = gr.Dropdown(["disabled"] + HAIRSTYLES, label="Hairstyles", value="disabled")
+                    clothing = gr.Dropdown(["disabled"] + CLOTHING, label="Clothing", value="disabled")
 
-                with gr.Accordion("Scene Details"):
-                    place = gr.Dropdown(["disabled", "random"] + PLACE, label="Place", value="random")
-                    lighting = gr.Dropdown(["disabled", "random"] + LIGHTING, label="Lighting", value="random")
-                    composition = gr.Dropdown(["disabled", "random"] + COMPOSITION, label="Composition", value="random")
-                    pose = gr.Dropdown(["disabled", "random"] + POSE, label="Pose", value="random")
-                    background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="random")
+                with gr.Accordion("Scene Details", value=False):
+                    place = gr.Dropdown(["disabled"] + PLACE, label="Place", value="disabled")
+                    lighting = gr.Dropdown(["disabled"] + LIGHTING, label="Lighting", value="disabled")
+                    composition = gr.Dropdown(["disabled"] + COMPOSITION, label="Composition", value="disabled")
+                    pose = gr.Dropdown(["disabled"] + POSE, label="Pose", value="disabled")
+                    background = gr.Dropdown(["disabled"] + BACKGROUND, label="Background", value="disabled")
 
-                with gr.Accordion("Style and Artist"):
-                    additional_details = gr.Dropdown(["disabled", "random"] + ADDITIONAL_DETAILS, label="Additional Details", value="random")
-                    photography_styles = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHY_STYLES, label="Photography Styles", value="random")
-                    device = gr.Dropdown(["disabled", "random"] + DEVICE, label="Device", value="random")
-                    photographer = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHER, label="Photographer", value="random")
-                    artist = gr.Dropdown(["disabled", "random"] + ARTIST, label="Artist", value="random")
-                    digital_artform = gr.Dropdown(["disabled", "random"] + DIGITAL_ARTFORM, label="Digital Artform", value="random")
+                with gr.Accordion("Style and Artist", value=False):
+                    additional_details = gr.Dropdown(["disabled"] + ADDITIONAL_DETAILS, label="Additional Details", value="disabled")
+                    photography_styles = gr.Dropdown(["disabled"] + PHOTOGRAPHY_STYLES, label="Photography Styles", value="disabled")
+                    device = gr.Dropdown(["disabled"] + DEVICE, label="Device", value="disabled")
+                    photographer = gr.Dropdown(["disabled"] + PHOTOGRAPHER, label="Photographer", value="disabled")
+                    artist = gr.Dropdown(["disabled"] + ARTIST, label="Artist", value="disabled")
+                    digital_artform = gr.Dropdown(["disabled"] + DIGITAL_ARTFORM, label="Digital Artform", value="disabled")
 
-            with gr.Column(scale=3):
+            with gr.Column(scale=2):
                 with gr.Accordion("Image and Caption", open=True):
                     input_image = gr.Image(label="Input Image (optional)")
                     caption_output = gr.Textbox(label="Generated Caption", lines=3)
@@ -425,7 +425,8 @@ def create_interface():
                     t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True)
                     clip_l_output = gr.Textbox(label="CLIP L Output", visible=True)
                     clip_g_output = gr.Textbox(label="CLIP G Output", visible=True)
-
+            
+            with gr.Column(scale=2):
                 with gr.Accordion("Text Generation", open=True):
                     model = gr.Dropdown(["Mixtral", "Mistral", "Llama 3", "Mistral-Nemo"], label="Model", value="Mixtral")
                     happy_talk = gr.Checkbox(label="Happy Talk", value=True)
