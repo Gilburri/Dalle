@@ -376,6 +376,14 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
             elif model == "Mistral-Nemo":
                 output = output.rstrip("<|im_end|></s>")
             
+            # Clean up the output
+            if ": " in output:
+                output = output.split(": ", 1)[1].strip()
+            elif output.lower().startswith("here"):
+                sentences = output.split(". ")
+                if len(sentences) > 1:
+                    output = ". ".join(sentences[1:]).strip()
+            
             self.save_prompt(output)
             return output
 
