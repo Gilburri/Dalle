@@ -9,6 +9,7 @@ import subprocess
 import torch
 from PIL import Image
 from transformers import AutoProcessor, AutoModelForCausalLM
+import random
 
 subprocess.run('pip install flash-attn --no-build-isolation', env={'FLASH_ATTENTION_SKIP_CUDA_BUILD': "TRUE"}, shell=True)
 
@@ -392,7 +393,7 @@ def create_interface():
         with gr.Row():
             with gr.Column(scale=2):
                 with gr.Accordion("Basic Settings"):
-                    seed = gr.Number(label="Seed", value=0)
+                    seed = gr.Number(label="Seed", value=random.randint(0, 1000000), randomize=True)
                     custom = gr.Textbox(label="Custom Input Prompt (optional)")
                     subject = gr.Textbox(label="Subject (optional)")
                     
