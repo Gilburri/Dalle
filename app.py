@@ -394,7 +394,7 @@ def create_interface():
         with gr.Row():
             with gr.Column(scale=2):
                 with gr.Accordion("Basic Settings"):
-                    seed = gr.Number(label="Seed", value=0)
+                    seed = gr.Number(label="Seed", value=-1) 
                     custom = gr.Textbox(label="Custom Input Prompt (optional)")
                     subject = gr.Textbox(label="Subject (optional)")
                     
@@ -464,13 +464,21 @@ def create_interface():
             outputs=[caption_output]
         )
 
+        def generate_prompt_with_random_seed(*args):
+            if args[0] == -1:  # If seed is -1, use a random seed
+                random_seed = random.randint(0, 2**32 - 1)
+                args = list(args)
+                args[0] = random_seed
+            return prompt_generator.generate_prompt(*args)
+
         generate_button.click(
-            prompt_generator.generate_prompt,
+            generate_prompt_with_random_seed,
             inputs=[seed, custom, subject, artform, photo_type, body_types, default_tags, roles, hairstyles,
                     additional_details, photography_styles, device, photographer, artist, digital_artform,
                     place, lighting, clothing, composition, pose, background],
             outputs=[output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
         )
+
 
         add_caption_button.click(
             prompt_generator.add_caption_to_prompt,
