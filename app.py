@@ -367,9 +367,18 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
             for response in stream:
                 if not response.token.text == "<|im_end|>":
                     output += response.token.text
+
+            # Remove specific tokens based on the model
+            if model == "Llama 3":
+                output = output.rstrip("<|eot_id|>")
+            elif model == "Mistral":
+                output = output.rstrip("</s>")
+            elif model == "Mistral-Nemo":
+                output = output.rstrip("<|im_end|></s>")
             
             self.save_prompt(output)
             return output
+
         except Exception as e:
             print(f"An error occurred: {e}")
             return f"Error occurred while processing the request: {str(e)}"
