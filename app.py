@@ -393,7 +393,7 @@ def create_interface():
         with gr.Row():
             with gr.Column(scale=2):
                 with gr.Accordion("Basic Settings"):
-                    seed = gr.Number(label="Seed", value=random.randint(0, 1000000), randomize=True)
+                    seed = gr.Number(label="Seed", value=random.randint(0, 1000000))
                     custom = gr.Textbox(label="Custom Input Prompt (optional)")
                     subject = gr.Textbox(label="Subject (optional)")
                     
