@@ -1,3 +1,51 @@
+Hugging Face's logo
+Hugging Face
+Search models, datasets, users...
+Models
+Datasets
+Spaces
+Posts
+Docs
+Solutions
+Pricing
+
+
+
+Spaces:
+
+gokaygokay
+/
+FLUX-Prompt-Generator
+
+
+like
+10
+
+Logs
+App
+Files
+Community
+Settings
+FLUX-Prompt-Generator
+/
+app.py
+
+gokaygokay's picture
+gokaygokay
+Update app.py
+b65ff3c
+verified
+less than a minute ago
+raw
+
+Copy download link
+history
+blame
+edit
+delete
+No virus
+
+26.2 kB
 import gradio as gr
 import random
 import json
@@ -333,7 +381,6 @@ class HuggingFaceInferenceNode:
             default_simple_prompt = """Create a brief, straightforward caption for this description, suitable for a text-to-image AI system. Focus on the main elements, key characters, and overall scene without elaborate details. Provide a clear and concise description in one or two sentences."""
 
             poster_prompt = """Analyze the provided description and extract key information to create a movie poster style description. Format the output as follows:
-
 Title: A catchy, intriguing title that captures the essence of the scene, place the title in "".
 Main character: Give a description of the main character.
 Background: Describe the background in detail.
@@ -378,7 +425,6 @@ title = """<h1 align="center">FLUX Prompt Generator</h1>
 <p><center>
 <a href="https://github.com/dagthomas/comfyui_dagthomas" target="_blank">[comfyui_dagthomas]</a>
 <a href="https://github.com/dagthomas" target="_blank">[dagthomas Github]</a>
-
 <p align="center">Create long prompts from images or simple words. Enhance your short prompts with prompt enhancer.</p>
 </center></p>
 """
@@ -394,7 +440,7 @@ def create_interface():
         with gr.Row():
             with gr.Column(scale=2):
                 with gr.Accordion("Basic Settings"):
-                    seed = gr.Number(label="Seed", value=-1) 
+                    seed = gr.Number(label="Seed", value=0)
                     custom = gr.Textbox(label="Custom Input Prompt (optional)")
                     subject = gr.Textbox(label="Subject (optional)")
                     
@@ -464,21 +510,13 @@ def create_interface():
             outputs=[caption_output]
         )
 
-        def generate_prompt_with_random_seed(*args):
-            if args[0] == -1:  # If seed is -1, use a random seed
-                random_seed = random.randint(0, 2**32 - 1)
-                args = list(args)
-                args[0] = random_seed
-            return prompt_generator.generate_prompt(*args)
-
         generate_button.click(
-            generate_prompt_with_random_seed,
+            prompt_generator.generate_prompt,
             inputs=[seed, custom, subject, artform, photo_type, body_types, default_tags, roles, hairstyles,
                     additional_details, photography_styles, device, photographer, artist, digital_artform,
                     place, lighting, clothing, composition, pose, background],
             outputs=[output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
         )
-
 
         add_caption_button.click(
             prompt_generator.add_caption_to_prompt,
