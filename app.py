@@ -393,8 +393,9 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
 
 title = """<h1 align="center">FLUX Prompt Generator</h1>
 <p><center>
+<a href="https://x.com/gokayfem" target="_blank">[X gokaygokay]</a>
+<a href="https://github.com/gokayfem" target="_blank">[Github gokayfem]</a>
 <a href="https://github.com/dagthomas/comfyui_dagthomas" target="_blank">[comfyui_dagthomas]</a>
-<a href="https://github.com/dagthomas" target="_blank">[dagthomas Github]</a>
 <p align="center">Create long prompts from images or simple words. Enhance your short prompts with prompt enhancer.</p>
 </center></p>
 """
