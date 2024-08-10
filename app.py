@@ -384,7 +384,6 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                 if len(sentences) > 1:
                     output = ". ".join(sentences[1:]).strip()
             
-            self.save_prompt(output)
             return output
 
         except Exception as e:
@@ -416,7 +415,11 @@ def create_interface():
                     subject = gr.Textbox(label="Subject (optional)")
                     
                     # Add the radio button for global option selection
-                    global_option = gr.Radio(["disabled", "random"], label="Set all options to:", value="disabled")
+                    global_option = gr.Radio(
+                        ["Disabled", "Random", "No Figure Random"],
+                        label="Set all options to:",
+                        value="Disabled"
+                    )
                 
                 with gr.Accordion("Artform and Photo Type", open=False):
                     artform = gr.Dropdown(["disabled", "random"] + ARTFORM, label="Artform", value="disabled")
@@ -502,12 +505,28 @@ def create_interface():
         )
 
         def update_all_options(choice):
-            return {dropdown: gr.update(value=choice) for dropdown in [
-                artform, photo_type, body_types, default_tags, roles, hairstyles, clothing,
-                place, lighting, composition, pose, background, additional_details,
-                photography_styles, device, photographer, artist, digital_artform
-            ]}
-
+            updates = {}
+            if choice == "Disabled":
+                for dropdown in [
+                    artform, photo_type, body_types, default_tags, roles, hairstyles, clothing,
+                    place, lighting, composition, pose, background, additional_details,
+                    photography_styles, device, photographer, artist, digital_artform
+                ]:
+                    updates[dropdown] = gr.update(value="disabled")
+            elif choice == "Random":
+                for dropdown in [
+                    artform, photo_type, body_types, default_tags, roles, hairstyles, clothing,
+                    place, lighting, composition, pose, background, additional_details,
+                    photography_styles, device, photographer, artist, digital_artform
+                ]:
+                    updates[dropdown] = gr.update(value="random")
+            else:  # No Figure Random
+                for dropdown in [photo_type, body_types, default_tags, roles, hairstyles, clothing, pose, additional_details]:
+                    updates[dropdown] = gr.update(value="disabled")
+                for dropdown in [artform, place, lighting, composition, background, photography_styles, device, photographer, artist, digital_artform]:
+                    updates[dropdown] = gr.update(value="random")
+            return updates
+        
         global_option.change(
             update_all_options,
             inputs=[global_option],
