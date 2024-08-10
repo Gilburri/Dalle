@@ -416,7 +416,7 @@ def create_interface():
                     
                     # Add the radio button for global option selection
                     global_option = gr.Radio(
-                        ["Disabled", "Random", "No Figure Random"],
+                        ["Disabled", "Random", "No Figure Rand"],
                         label="Set all options to:",
                         value="Disabled"
                     )
