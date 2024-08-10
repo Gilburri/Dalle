@@ -410,7 +410,7 @@ def create_interface():
         with gr.Row():
             with gr.Column(scale=2):
                 with gr.Accordion("Basic Settings"):
-                    seed = gr.Slider(0, 30000, label='Seed', step=1, value=12345)
+                    seed = gr.Slider(0, 30000, label='Seed', step=1, value=random.randint(0,30000))
                     custom = gr.Textbox(label="Custom Input Prompt (optional)")
                     subject = gr.Textbox(label="Subject (optional)")
                     
