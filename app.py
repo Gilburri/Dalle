@@ -22,6 +22,7 @@ florence_model = AutoModelForCausalLM.from_pretrained('microsoft/Florence-2-base
 florence_processor = AutoProcessor.from_pretrained('microsoft/Florence-2-base', trust_remote_code=True)
 
 # Florence caption function
+@spaces.GPU
 def florence_caption(image):
     if not isinstance(image, Image.Image):
         image = Image.fromarray(image)
