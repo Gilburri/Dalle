@@ -1,4 +1,11 @@
 spaces
-transformers
 timm
 openai==1.37.0
+numpy==1.24.4
+Pillow==10.3.0
+Requests==2.31.0
+torch
+torchvision
+git+https://github.com/huggingface/transformers.git
+accelerate
+qwen-vl-utils

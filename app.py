@@ -9,8 +9,9 @@ from huggingface_hub import InferenceClient
 import subprocess
 import torch
 from PIL import Image
-from transformers import AutoProcessor, AutoModelForCausalLM
-import random
+from transformers import AutoProcessor, AutoModelForCausalLM, Qwen2VLForConditionalGeneration
+from qwen_vl_utils import process_vision_info
+import numpy as np
 
 subprocess.run('pip install flash-attn --no-build-isolation', env={'FLASH_ATTENTION_SKIP_CUDA_BUILD': "TRUE"}, shell=True)
 
@@ -20,6 +21,10 @@ huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 device = "cuda" if torch.cuda.is_available() else "cpu"
 florence_model = AutoModelForCausalLM.from_pretrained('microsoft/Florence-2-large', trust_remote_code=True).to(device).eval()
 florence_processor = AutoProcessor.from_pretrained('microsoft/Florence-2-large', trust_remote_code=True)
+
+# Initialize Qwen2-VL-2B model
+qwen_model = Qwen2VLForConditionalGeneration.from_pretrained("Qwen/Qwen2-VL-2B-Instruct", trust_remote_code=True, torch_dtype="auto").to(device).eval()
+qwen_processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct", trust_remote_code=True)
 
 # Florence caption function
 @spaces.GPU
@@ -43,6 +48,50 @@ def florence_caption(image):
         image_size=(image.width, image.height)
     )
     return parsed_answer["<MORE_DETAILED_CAPTION>"]
+
+# Qwen2-VL-2B caption function
+@spaces.GPU
+def qwen_caption(image):
+    if not isinstance(image, Image.Image):
+        image = Image.fromarray(image)
+    
+    image_path = array_to_image_path(np.array(image))
+    
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "image": image_path,
+                },
+                {"type": "text", "text": "Describe this image in detail."},
+            ],
+        }
+    ]
+    
+    text = qwen_processor.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True
+    )
+    image_inputs, video_inputs = process_vision_info(messages)
+    inputs = qwen_processor(
+        text=[text],
+        images=image_inputs,
+        videos=video_inputs,
+        padding=True,
+        return_tensors="pt",
+    )
+    inputs = inputs.to(device)
+    
+    generated_ids = qwen_model.generate(**inputs, max_new_tokens=256)
+    generated_ids_trimmed = [
+        out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+    ]
+    output_text = qwen_processor.batch_decode(
+        generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+    )
+    
+    return output_text[0]
 
 # Load JSON files
 def load_json_file(file_name):
@@ -469,6 +518,7 @@ def create_interface():
                 with gr.Accordion("Image and Caption", open=False):
                     input_image = gr.Image(label="Input Image (optional)")
                     caption_output = gr.Textbox(label="Generated Caption", lines=3)
+                    caption_model = gr.Radio(["Florence", "Qwen"], label="Caption Model", value="Florence")
                     create_caption_button = gr.Button("Create Caption")
                     add_caption_button = gr.Button("Add Caption to Prompt")
 
@@ -488,14 +538,17 @@ def create_interface():
                 generate_text_button = gr.Button("Generate Prompt with LLM (Llama 3.1 70B)")
                 text_output = gr.Textbox(label="Generated Text", lines=10)
 
-        def create_caption(image):
+        def create_caption(image, model):
             if image is not None:
-                return florence_caption(image)
+                if model == "Florence":
+                    return florence_caption(image)
+                elif model == "Qwen":
+                    return qwen_caption(image)
             return ""
 
         create_caption_button.click(
             create_caption,
-            inputs=[input_image],
+            inputs=[input_image, caption_model],
             outputs=[caption_output]
         )
 
