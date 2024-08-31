@@ -18,8 +18,8 @@ huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 
 # Initialize Florence model
 device = "cuda" if torch.cuda.is_available() else "cpu"
-florence_model = AutoModelForCausalLM.from_pretrained('microsoft/Florence-2-base', trust_remote_code=True).to(device).eval()
-florence_processor = AutoProcessor.from_pretrained('microsoft/Florence-2-base', trust_remote_code=True)
+florence_model = AutoModelForCausalLM.from_pretrained('microsoft/Florence-2-large', trust_remote_code=True).to(device).eval()
+florence_processor = AutoProcessor.from_pretrained('microsoft/Florence-2-large', trust_remote_code=True)
 
 # Florence caption function
 @spaces.GPU
