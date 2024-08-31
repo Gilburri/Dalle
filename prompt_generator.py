@@ -125,20 +125,14 @@ class PromptGenerator:
                             next_data[category][file[:-5]] = json_data
         return next_data
 
-    def process_next_data(self, prompt, separator, category, field, value, attributes=False):
+    def process_next_data(self, prompt, separator, category, field, value):
         if category in self.next_data and field in self.next_data[category]:
             field_data = self.next_data[category][field]
             
             if isinstance(field_data, list):
                 items = field_data
-                preprompt = ""
-                field_separator = ", "
-                endprompt = ""
             elif isinstance(field_data, dict):
                 items = field_data.get("items", [])
-                preprompt = str(field_data.get("preprompt", "")).strip()
-                field_separator = f" {str(field_data.get('separator', ', ')).strip()} "
-                endprompt = str(field_data.get("endprompt", "")).strip()
             else:
                 return prompt
 
@@ -152,35 +146,14 @@ class PromptGenerator:
             else:
                 selected_items = [value]
 
-            formatted_items = []
-            for item in selected_items:
-                item_str = str(item)
-                if attributes and "attributes" in field_data and item_str in field_data["attributes"]:
-                    item_attributes = field_data["attributes"].get(item_str, [])
-                    if item_attributes:
-                        selected_attributes = self.rng.sample(item_attributes, min(3, len(item_attributes)))
-                        formatted_items.append(f"{item_str} ({', '.join(map(str, selected_attributes))})")
-                    else:
-                        formatted_items.append(item_str)
-                else:
-                    formatted_items.append(item_str)
-
-            formatted_values = field_separator.join(formatted_items)
-            formatted_addition = []
-            if preprompt:
-                formatted_addition.append(preprompt)
-            formatted_addition.append(formatted_values)
-            if endprompt:
-                formatted_addition.append(endprompt)
-
-            formatted_output = " ".join(formatted_addition).strip()
-            prompt += f" {formatted_output}"
+            formatted_values = separator.join(selected_items)
+            prompt += f"{separator}{formatted_values}"
 
         return prompt
 
     def generate_prompt(self, seed, custom, subject, gender, artform, photo_type, body_types, default_tags, roles, hairstyles,
-                        additional_details, photography_styles, device, photographer, artist, digital_artform,
-                        place, lighting, clothing, composition, pose, background, input_image, **next_params):
+                    additional_details, photography_styles, device, photographer, artist, digital_artform,
+                    place, lighting, clothing, composition, pose, background, input_image, **next_params):
         kwargs = locals()
         del kwargs['self']
         del kwargs['next_params']
