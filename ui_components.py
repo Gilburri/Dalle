@@ -153,7 +153,7 @@ def create_interface():
                     additional_details, photography_styles, device, photographer, artist, digital_artform,
                     place, lighting, clothing, composition, pose, background, input_image] + 
                     [component for category in next_components.values() for component in category.values()],
-            outputs=[gr.Number(label="Used Seed", visible=True), output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
+            outputs=[gr.Number(label="Used Seed", visible=False), output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
         )
 
         add_caption_button.click(
