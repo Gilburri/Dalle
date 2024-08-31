@@ -141,12 +141,8 @@ def create_interface():
                     next_arg_index += 1
                 if category_params:
                     next_params[category] = category_params
-
-            print(next_params)
             # Call generate_prompt with the correct arguments
             result = prompt_generator.generate_prompt(dynamic_seed, *main_args, next_params=next_params)
-
-            print(result)
             
             return [dynamic_seed] + list(result)
 
