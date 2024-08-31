@@ -113,6 +113,7 @@ class PromptGenerator:
     def load_next_data(self):
         next_data = {}
         next_path = os.path.join("data", "next")
+        print(f"Loading next data from: {next_path}")
         for category in os.listdir(next_path):
             category_path = os.path.join(next_path, category)
             if os.path.isdir(category_path):
@@ -120,12 +121,15 @@ class PromptGenerator:
                 for file in os.listdir(category_path):
                     if file.endswith(".json"):
                         file_path = os.path.join(category_path, file)
+                        print(f"Loading file: {file_path}")
                         with open(file_path, "r", encoding="utf-8") as f:
                             json_data = json.load(f)
                             next_data[category][file[:-5]] = json_data
+        print(f"Loaded next_data: {next_data}")
         return next_data
 
     def process_next_data(self, prompt, separator, category, field, value):
+        print(f"Processing next data: category={category}, field={field}, value={value}")
         if category in self.next_data and field in self.next_data[category]:
             field_data = self.next_data[category][field]
             
