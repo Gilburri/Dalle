@@ -317,14 +317,16 @@ class PromptGenerator:
             return f"{prompt}, {caption}"
         return prompt
 
+import os
+from openai import OpenAI
+
 class HuggingFaceInferenceNode:
     def __init__(self):
-        self.clients = {
-            "Mixtral": InferenceClient("NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO"),
-            "Mistral": InferenceClient("mistralai/Mistral-7B-Instruct-v0.3"),
-            "Llama 3": InferenceClient("meta-llama/Meta-Llama-3-8B-Instruct"),
-            "Mistral-Nemo": InferenceClient("mistralai/Mistral-Nemo-Instruct-2407")
-        }
+        self.ACCESS_TOKEN = os.getenv("HF_TOKEN")
+        self.client = OpenAI(
+            base_url="https://api-inference.huggingface.co/v1/",
+            api_key=self.ACCESS_TOKEN,
+        )
         self.prompts_dir = "./prompts"
         os.makedirs(self.prompts_dir, exist_ok=True)
 
@@ -343,8 +345,6 @@ class HuggingFaceInferenceNode:
 
     def generate(self, model, input_text, happy_talk, compress, compression_level, poster, custom_base_prompt=""):
         try:
-            client = self.clients[model]
-
             default_happy_prompt = """Create a detailed visually descriptive caption of this description, which will be used as a prompt for a text to image AI system (caption only, no instructions like "create an image").Remove any mention of digital artwork or artwork style. Give detailed visual descriptions of the character(s), including ethnicity, skin tone, expression etc. Imagine using keywords for a still for someone who has aphantasia. Describe the image style, e.g. any photographic or art styles / techniques utilized. Make sure to fully describe all aspects of the cinematography, with abundant technical details and visual descriptions. If there is more than one image, combine the elements and characters from all of the images creatively into a single cohesive composition with a single background, inventing an interaction between the characters. Be creative in combining the characters into a single cohesive scene. Focus on two primary characters (or one) and describe an interesting interaction between them, such as a hug, a kiss, a fight, giving an object, an emotional reaction / interaction. If there is more than one background in the images, pick the most appropriate one. Your output is only the caption itself, no comments or extra formatting. The caption is in a single long paragraph. If you feel the images are inappropriate, invent a new scene / characters inspired by these. Additionally, incorporate a specific movie director's visual style and describe the lighting setup in detail, including the type, color, and placement of light sources to create the desired mood and atmosphere. Always frame the scene, including details about the film grain, color grading, and any artifacts or characteristics specific."""
 
             default_simple_prompt = """Create a brief, straightforward caption for this description, suitable for a text-to-image AI system. Focus on the main elements, key characters, and overall scene without elaborate details. Provide a clear and concise description in one or two sentences."""
@@ -375,23 +375,24 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                 char_limit = compression_chars[compression_level]
                 base_prompt += f" Compress the output to be concise while retaining key visual details. MAX OUTPUT SIZE no more than {char_limit} characters."
 
-            messages = f"<|im_start|>system\nYou are a helpful assistant. Try your best to give best response possible to user.<|im_end|>"
-            messages += f"\n<|im_start|>user\n{base_prompt}\nDescription: {input_text}<|im_end|>\n<|im_start|>assistant\n"
+            system_message = "You are a helpful assistant. Try your best to give the best response possible to the user."
+            user_message = f"{base_prompt}\nDescription: {input_text}"
 
-            stream = client.text_generation(messages, max_new_tokens=4000, do_sample=True, stream=True, details=True, return_full_text=False)
-            output = ""
-            for response in stream:
-                if not response.token.text == "<|im_end|>":
-                    output += response.token.text
+            messages = [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message}
+            ]
 
-            # Remove specific tokens based on the model
-            if model == "Llama 3":
-                output = output.rstrip("<|eot_id|>")
-            elif model == "Mistral":
-                output = output.rstrip("</s>")
-            elif model == "Mistral-Nemo":
-                output = output.rstrip("<|im_end|></s>")
-            
+            response = self.client.chat.completions.create(
+                model="meta-llama/Meta-Llama-3.1-70B-Instruct",
+                max_tokens=1024,
+                temperature=0.7,
+                top_p=0.95,
+                messages=messages,
+            )
+
+            output = response.choices[0].message.content.strip()
+
             # Clean up the output
             if ": " in output:
                 output = output.split(": ", 1)[1].strip()

@@ -1,3 +1,4 @@
 spaces
 transformers
 timm
+openai==1.37.0
