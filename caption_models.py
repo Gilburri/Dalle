@@ -6,6 +6,9 @@ from qwen_vl_utils import process_vision_info
 import numpy as np
 import os
 from datetime import datetime
+import subprocess
+
+subprocess.run('pip install flash-attn --no-build-isolation', env={'FLASH_ATTENTION_SKIP_CUDA_BUILD': "TRUE"}, shell=True)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
