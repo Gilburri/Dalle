@@ -108,7 +108,12 @@ def create_interface():
             with gr.Accordion(f"{category.capitalize()} Options", open=False):
                 category_components = {}
                 for field, data in fields.items():
-                    options = ["None", "Random", "Multiple Random"] + data.get("items", [])
+                    if isinstance(data, list):
+                        options = ["None", "Random", "Multiple Random"] + data
+                    elif isinstance(data, dict):
+                        options = ["None", "Random", "Multiple Random"] + data.get("items", [])
+                    else:
+                        options = ["None", "Random", "Multiple Random"]
                     category_components[field] = gr.Dropdown(options, label=field.capitalize(), value="None")
                 next_components[category] = category_components
 
