@@ -128,10 +128,19 @@ class PromptGenerator:
     def process_next_data(self, prompt, separator, category, field, value, attributes=False):
         if category in self.next_data and field in self.next_data[category]:
             field_data = self.next_data[category][field]
-            items = field_data.get("items", [])
-            preprompt = str(field_data.get("preprompt", "")).strip()
-            field_separator = f" {str(field_data.get('separator', ', ')).strip()} "
-            endprompt = str(field_data.get("endprompt", "")).strip()
+            
+            if isinstance(field_data, list):
+                items = field_data
+                preprompt = ""
+                field_separator = ", "
+                endprompt = ""
+            elif isinstance(field_data, dict):
+                items = field_data.get("items", [])
+                preprompt = str(field_data.get("preprompt", "")).strip()
+                field_separator = f" {str(field_data.get('separator', ', ')).strip()} "
+                endprompt = str(field_data.get("endprompt", "")).strip()
+            else:
+                return prompt
 
             if value == "None":
                 return prompt
@@ -174,6 +183,7 @@ class PromptGenerator:
                         place, lighting, clothing, composition, pose, background, input_image, **next_params):
         kwargs = locals()
         del kwargs['self']
+        del kwargs['next_params']
         
         seed = kwargs.get("seed", 0)
         if seed is not None:
