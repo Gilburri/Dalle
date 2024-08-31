@@ -485,7 +485,7 @@ def create_interface():
                     compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="hard")
                     poster = gr.Checkbox(label="Poster", value=False)
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
-                generate_text_button = gr.Button("Generate Prompt with LLM")
+                generate_text_button = gr.Button("Generate Prompt with LLM (Llama 3.1 70B)")
                 text_output = gr.Textbox(label="Generated Text", lines=10)
 
         def create_caption(image):
