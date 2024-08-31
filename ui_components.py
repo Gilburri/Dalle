@@ -119,8 +119,23 @@ def create_interface():
 
         def generate_prompt_with_dynamic_seed(*args, **kwargs):
             dynamic_seed = random.randint(0, 1000000)
-            next_params = {category: {field: value for field, value in fields.items()} for category, fields in kwargs.items() if category in prompt_generator.next_data}
-            result = prompt_generator.generate_prompt(dynamic_seed, *args, **next_params)
+            
+            # Extract the main arguments
+            main_args = args[:22]  # Assuming there are 22 main arguments before the next_params
+            
+            # Extract next_params
+            next_params = {}
+            for category, fields in prompt_generator.next_data.items():
+                category_params = {}
+                for field in fields:
+                    if field in kwargs:
+                        category_params[field] = kwargs[field]
+                if category_params:
+                    next_params[category] = category_params
+
+            # Call generate_prompt with the correct arguments
+            result = prompt_generator.generate_prompt(dynamic_seed, *main_args, **next_params)
+            
             return [dynamic_seed] + list(result)
 
         generate_button.click(
