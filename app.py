@@ -16,7 +16,6 @@ subprocess.run('pip install flash-attn --no-build-isolation', env={'FLASH_ATTENT
 
 huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 
-
 # Initialize Florence model
 device = "cuda" if torch.cuda.is_available() else "cpu"
 florence_model = AutoModelForCausalLM.from_pretrained('microsoft/Florence-2-base', trust_remote_code=True).to(device).eval()
@@ -44,31 +43,38 @@ def florence_caption(image):
         image_size=(image.width, image.height)
     )
     return parsed_answer["<MORE_DETAILED_CAPTION>"]
-    
+
 # Load JSON files
 def load_json_file(file_name):
     file_path = os.path.join("data", file_name)
     with open(file_path, "r") as file:
         return json.load(file)
 
+# Load gender-specific JSON files
+FEMALE_DEFAULT_TAGS = load_json_file("female_default_tags.json")
+MALE_DEFAULT_TAGS = load_json_file("male_default_tags.json")
+FEMALE_BODY_TYPES = load_json_file("female_body_types.json")
+MALE_BODY_TYPES = load_json_file("male_body_types.json")
+FEMALE_CLOTHING = load_json_file("female_clothing.json")
+MALE_CLOTHING = load_json_file("male_clothing.json")
+FEMALE_ADDITIONAL_DETAILS = load_json_file("female_additional_details.json")
+MALE_ADDITIONAL_DETAILS = load_json_file("male_additional_details.json")
+
+# Load non-gender-specific JSON files
 ARTFORM = load_json_file("artform.json")
 PHOTO_TYPE = load_json_file("photo_type.json")
-BODY_TYPES = load_json_file("body_types.json")
-DEFAULT_TAGS = load_json_file("default_tags.json")
 ROLES = load_json_file("roles.json")
 HAIRSTYLES = load_json_file("hairstyles.json")
-ADDITIONAL_DETAILS = load_json_file("additional_details.json")
+PLACE = load_json_file("place.json")
+LIGHTING = load_json_file("lighting.json")
+COMPOSITION = load_json_file("composition.json")
+POSE = load_json_file("pose.json")
+BACKGROUND = load_json_file("background.json")
 PHOTOGRAPHY_STYLES = load_json_file("photography_styles.json")
 DEVICE = load_json_file("device.json")
 PHOTOGRAPHER = load_json_file("photographer.json")
 ARTIST = load_json_file("artist.json")
 DIGITAL_ARTFORM = load_json_file("digital_artform.json")
-PLACE = load_json_file("place.json")
-LIGHTING = load_json_file("lighting.json")
-CLOTHING = load_json_file("clothing.json")
-COMPOSITION = load_json_file("composition.json")
-POSE = load_json_file("pose.json")
-BACKGROUND = load_json_file("background.json")
 
 class PromptGenerator:
     def __init__(self, seed=None):
@@ -89,12 +95,12 @@ class PromptGenerator:
             return input_str
 
     def clean_consecutive_commas(self, input_string):
-        cleaned_string = re.sub(r',\s*,', ',', input_string)
+        cleaned_string = re.sub(r',\s*,', ', ', input_string)
         return cleaned_string
 
     def process_string(self, replaced, seed):
-        replaced = re.sub(r'\s*,\s*', ',', replaced)
-        replaced = re.sub(r',+', ',', replaced)
+        replaced = re.sub(r'\s*,\s*', ', ', replaced)
+        replaced = re.sub(r',+', ', ', replaced)
         original = replaced
         
         first_break_clipl_index = replaced.find("BREAK_CLIPL")
@@ -120,24 +126,31 @@ class PromptGenerator:
         t5xxl = replaced
         
         original = original.replace("BREAK_CLIPL", "").replace("BREAK_CLIPG", "")
-        original = re.sub(r'\s*,\s*', ',', original)
-        original = re.sub(r',+', ',', original)
-        clip_l = re.sub(r'\s*,\s*', ',', clip_l)
-        clip_l = re.sub(r',+', ',', clip_l)
-        clip_g = re.sub(r'\s*,\s*', ',', clip_g)
-        clip_g = re.sub(r',+', ',', clip_g)
-        if clip_l.startswith(","):
-            clip_l = clip_l[1:]
-        if clip_g.startswith(","):
-            clip_g = clip_g[1:]
-        if original.startswith(","):
-            original = original[1:]
-        if t5xxl.startswith(","):
-            t5xxl = t5xxl[1:]
+        original = re.sub(r'\s*,\s*', ', ', original)
+        original = re.sub(r',+', ', ', original)
+        clip_l = re.sub(r'\s*,\s*', ', ', clip_l)
+        clip_l = re.sub(r',+', ', ', clip_l)
+        clip_g = re.sub(r'\s*,\s*', ', ', clip_g)
+        clip_g = re.sub(r',+', ', ', clip_g)
+        if clip_l.startswith(", "):
+            clip_l = clip_l[2:]
+        if clip_g.startswith(", "):
+            clip_g = clip_g[2:]
+        if original.startswith(", "):
+            original = original[2:]
+        if t5xxl.startswith(", "):
+            t5xxl = t5xxl[2:]
+
+        # Add spaces after commas
+        replaced = re.sub(r',(?!\s)', ', ', replaced)
+        original = re.sub(r',(?!\s)', ', ', original)
+        clip_l = re.sub(r',(?!\s)', ', ', clip_l)
+        clip_g = re.sub(r',(?!\s)', ', ', clip_g)
+        t5xxl = re.sub(r',(?!\s)', ', ', t5xxl)
 
         return original, seed, t5xxl, clip_l, clip_g
 
-    def generate_prompt(self, seed, custom, subject, artform, photo_type, body_types, default_tags, roles, hairstyles,
+    def generate_prompt(self, seed, custom, subject, gender, artform, photo_type, body_types, default_tags, roles, hairstyles,
                         additional_details, photography_styles, device, photographer, artist, digital_artform,
                         place, lighting, clothing, composition, pose, background, input_image):
         kwargs = locals()
@@ -156,6 +169,7 @@ class PromptGenerator:
         )
 
         subject = kwargs.get("subject", "")
+        gender = kwargs.get("gender", "female")
 
         if is_photographer:
             selected_photo_style = self.get_choice(kwargs.get("photography_styles", ""), PHOTOGRAPHY_STYLES)
@@ -170,18 +184,18 @@ class PromptGenerator:
         if not subject:
             if default_tags == "random":
                 if body_type != "disabled" and body_type != "random":
-                    selected_subject = self.get_choice(kwargs.get("default_tags", ""), DEFAULT_TAGS).replace("a ", "").replace("an ", "")
+                    selected_subject = self.get_choice(kwargs.get("default_tags", ""), FEMALE_DEFAULT_TAGS if gender == "female" else MALE_DEFAULT_TAGS).replace("a ", "").replace("an ", "")
                     components.append("a ")
                     components.append(body_type)
                     components.append(selected_subject)
                 elif body_type == "disabled":
-                    selected_subject = self.get_choice(kwargs.get("default_tags", ""), DEFAULT_TAGS)
+                    selected_subject = self.get_choice(kwargs.get("default_tags", ""), FEMALE_DEFAULT_TAGS if gender == "female" else MALE_DEFAULT_TAGS)
                     components.append(selected_subject)
                 else:
-                    body_type = self.get_choice(body_type, BODY_TYPES)
+                    body_type = self.get_choice(body_type, FEMALE_BODY_TYPES if gender == "female" else MALE_BODY_TYPES)
                     components.append("a ")
                     components.append(body_type)
-                    selected_subject = self.get_choice(kwargs.get("default_tags", ""), DEFAULT_TAGS).replace("a ", "").replace("an ", "")
+                    selected_subject = self.get_choice(kwargs.get("default_tags", ""), FEMALE_DEFAULT_TAGS if gender == "female" else MALE_DEFAULT_TAGS).replace("a ", "").replace("an ", "")
                     components.append(selected_subject)
             elif default_tags == "disabled":
                 pass
@@ -194,7 +208,7 @@ class PromptGenerator:
             elif body_type == "disabled":
                 pass
             else:
-                body_type = self.get_choice(body_type, BODY_TYPES)
+                body_type = self.get_choice(body_type, FEMALE_BODY_TYPES if gender == "female" else MALE_BODY_TYPES)
                 components.append("a ")
                 components.append(body_type)
             components.append(subject)
@@ -202,13 +216,13 @@ class PromptGenerator:
         params = [
             ("roles", ROLES),
             ("hairstyles", HAIRSTYLES),
-            ("additional_details", ADDITIONAL_DETAILS),
+            ("additional_details", FEMALE_ADDITIONAL_DETAILS if gender == "female" else MALE_ADDITIONAL_DETAILS),
         ]
         for param in params:
             components.append(self.get_choice(kwargs.get(param[0], ""), param[1]))
         for i in reversed(range(len(components))):
             if components[i] in PLACE:
-                components[i] += ","
+                components[i] += ", "
                 break
         if kwargs.get("clothing", "") != "disabled" and kwargs.get("clothing", "") != "random":
             components.append(", dressed in ")
@@ -216,49 +230,49 @@ class PromptGenerator:
             components.append(clothing)
         elif kwargs.get("clothing", "") == "random":
             components.append(", dressed in ")
-            clothing = self.get_choice(kwargs.get("clothing", ""), CLOTHING)
+            clothing = self.get_choice(kwargs.get("clothing", ""), FEMALE_CLOTHING if gender == "female" else MALE_CLOTHING)
             components.append(clothing)
 
         if kwargs.get("composition", "") != "disabled" and kwargs.get("composition", "") != "random":
-            components.append(",")
+            components.append(", ")
             composition = kwargs.get("composition", "")
             components.append(composition)
         elif kwargs.get("composition", "") == "random": 
-            components.append(",")
+            components.append(", ")
             composition = self.get_choice(kwargs.get("composition", ""), COMPOSITION)
             components.append(composition)
         
         if kwargs.get("pose", "") != "disabled" and kwargs.get("pose", "") != "random":
-            components.append(",")
+            components.append(", ")
             pose = kwargs.get("pose", "")
             components.append(pose)
         elif kwargs.get("pose", "") == "random":
-            components.append(",")
+            components.append(", ")
             pose = self.get_choice(kwargs.get("pose", ""), POSE)
             components.append(pose)
         components.append("BREAK_CLIPG")
         if kwargs.get("background", "") != "disabled" and kwargs.get("background", "") != "random":
-            components.append(",")
+            components.append(", ")
             background = kwargs.get("background", "")
             components.append(background)
         elif kwargs.get("background", "") == "random": 
-            components.append(",")
+            components.append(", ")
             background = self.get_choice(kwargs.get("background", ""), BACKGROUND)
             components.append(background)
 
         if kwargs.get("place", "") != "disabled" and kwargs.get("place", "") != "random":
-            components.append(",")
+            components.append(", ")
             place = kwargs.get("place", "")
             components.append(place)
         elif kwargs.get("place", "") == "random": 
-            components.append(",")
+            components.append(", ")
             place = self.get_choice(kwargs.get("place", ""), PLACE)
-            components.append(place + ",")
+            components.append(place + ", ")
 
         lighting = kwargs.get("lighting", "").lower()
         if lighting == "random":
             selected_lighting = ", ".join(self.rng.sample(LIGHTING, self.rng.randint(2, 5)))
-            components.append(",")
+            components.append(", ")
             components.append(selected_lighting)
         elif lighting == "disabled":
             pass
@@ -412,9 +426,9 @@ def create_interface():
         with gr.Row():
             with gr.Column(scale=2):
                 with gr.Accordion("Basic Settings"):
-                    seed = gr.Slider(0, 30000, label='Seed', step=1, value=random.randint(0,30000))
                     custom = gr.Textbox(label="Custom Input Prompt (optional)")
                     subject = gr.Textbox(label="Subject (optional)")
+                    gender = gr.Radio(["female", "male"], label="Gender", value="female")
                     
                     # Add the radio button for global option selection
                     global_option = gr.Radio(
@@ -428,11 +442,11 @@ def create_interface():
                     photo_type = gr.Dropdown(["disabled", "random"] + PHOTO_TYPE, label="Photo Type", value="disabled")
             
                 with gr.Accordion("Character Details", open=False):
-                    body_types = gr.Dropdown(["disabled", "random"] + BODY_TYPES, label="Body Types", value="disabled")
-                    default_tags = gr.Dropdown(["disabled", "random"] + DEFAULT_TAGS, label="Default Tags", value="disabled")
+                    body_types = gr.Dropdown(["disabled", "random"] + FEMALE_BODY_TYPES + MALE_BODY_TYPES, label="Body Types", value="disabled")
+                    default_tags = gr.Dropdown(["disabled", "random"] + FEMALE_DEFAULT_TAGS + MALE_DEFAULT_TAGS, label="Default Tags", value="disabled")
                     roles = gr.Dropdown(["disabled", "random"] + ROLES, label="Roles", value="disabled")
                     hairstyles = gr.Dropdown(["disabled", "random"] + HAIRSTYLES, label="Hairstyles", value="disabled")
-                    clothing = gr.Dropdown(["disabled", "random"] + CLOTHING, label="Clothing", value="disabled")
+                    clothing = gr.Dropdown(["disabled", "random"] + FEMALE_CLOTHING + MALE_CLOTHING, label="Clothing", value="disabled")
             
                 with gr.Accordion("Scene Details", open=False):
                     place = gr.Dropdown(["disabled", "random"] + PLACE, label="Place", value="disabled")
@@ -442,7 +456,7 @@ def create_interface():
                     background = gr.Dropdown(["disabled", "random"] + BACKGROUND, label="Background", value="disabled")
             
                 with gr.Accordion("Style and Artist", open=False):
-                    additional_details = gr.Dropdown(["disabled", "random"] + ADDITIONAL_DETAILS, label="Additional Details", value="disabled")
+                    additional_details = gr.Dropdown(["disabled", "random"] + FEMALE_ADDITIONAL_DETAILS + MALE_ADDITIONAL_DETAILS, label="Additional Details", value="disabled")
                     photography_styles = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHY_STYLES, label="Photography Styles", value="disabled")
                     device = gr.Dropdown(["disabled", "random"] + DEVICE, label="Device", value="disabled")
                     photographer = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHER, label="Photographer", value="disabled")
@@ -486,12 +500,22 @@ def create_interface():
             outputs=[caption_output]
         )
 
+        def generate_prompt_with_dynamic_seed(*args):
+            # Generate a new random seed
+            dynamic_seed = random.randint(0, 1000000)
+            
+            # Call the generate_prompt function with the dynamic seed
+            result = prompt_generator.generate_prompt(dynamic_seed, *args)
+            
+            # Return the result along with the used seed
+            return [dynamic_seed] + list(result)
+
         generate_button.click(
-            prompt_generator.generate_prompt,
-            inputs=[seed, custom, subject, artform, photo_type, body_types, default_tags, roles, hairstyles,
+            generate_prompt_with_dynamic_seed,
+            inputs=[custom, subject, gender, artform, photo_type, body_types, default_tags, roles, hairstyles,
                     additional_details, photography_styles, device, photographer, artist, digital_artform,
-                    place, lighting, clothing, composition, pose, background],
-            outputs=[output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
+                    place, lighting, clothing, composition, pose, background, input_image],
+            outputs=[gr.Number(label="Used Seed", visible=True), output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
         )
 
         add_caption_button.click(
