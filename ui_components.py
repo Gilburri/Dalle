@@ -78,9 +78,11 @@ def create_interface():
                                 category_components[field] = gr.Dropdown(options, label=field.capitalize(), value="None")
                             next_components[category] = category_components
                 
-                generate_button = gr.Button("Generate Prompt")
+                
 
             with gr.Column(scale=2):
+                generate_button = gr.Button("Generate Prompt")
+
                 with gr.Accordion("Image and Caption", open=False):
                     input_image = gr.Image(label="Input Image (optional)")
                     caption_output = gr.Textbox(label="Generated Caption", lines=3)
