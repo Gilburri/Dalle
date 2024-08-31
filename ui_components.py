@@ -102,16 +102,28 @@ def create_interface():
             outputs=[caption_output]
         )
 
-        def generate_prompt_with_dynamic_seed(*args):
+        # Add Next components
+        next_components = {}
+        for category, fields in prompt_generator.next_data.items():
+            with gr.Accordion(f"{category.capitalize()} Options", open=False):
+                category_components = {}
+                for field, data in fields.items():
+                    options = ["None", "Random", "Multiple Random"] + data.get("items", [])
+                    category_components[field] = gr.Dropdown(options, label=field.capitalize(), value="None")
+                next_components[category] = category_components
+
+        def generate_prompt_with_dynamic_seed(*args, **kwargs):
             dynamic_seed = random.randint(0, 1000000)
-            result = prompt_generator.generate_prompt(dynamic_seed, *args)
+            next_params = {category: {field: value for field, value in fields.items()} for category, fields in kwargs.items() if category in prompt_generator.next_data}
+            result = prompt_generator.generate_prompt(dynamic_seed, *args, **next_params)
             return [dynamic_seed] + list(result)
 
         generate_button.click(
             generate_prompt_with_dynamic_seed,
             inputs=[custom, subject, gender, artform, photo_type, body_types, default_tags, roles, hairstyles,
                     additional_details, photography_styles, device, photographer, artist, digital_artform,
-                    place, lighting, clothing, composition, pose, background, input_image],
+                    place, lighting, clothing, composition, pose, background, input_image] + 
+                    [component for category in next_components.values() for component in category.values()],
             outputs=[gr.Number(label="Used Seed", visible=True), output, gr.Number(visible=False), t5xxl_output, clip_l_output, clip_g_output]
         )
 

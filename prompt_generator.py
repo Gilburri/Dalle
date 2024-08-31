@@ -38,6 +38,7 @@ DIGITAL_ARTFORM = load_json_file("digital_artform.json")
 class PromptGenerator:
     def __init__(self, seed=None):
         self.rng = random.Random(seed)
+        self.next_data = self.load_next_data()
 
     def split_and_choose(self, input_str):
         choices = [choice.strip() for choice in input_str.split(",")]
@@ -109,9 +110,68 @@ class PromptGenerator:
 
         return original, seed, t5xxl, clip_l, clip_g
 
+    def load_next_data(self):
+        next_data = {}
+        next_path = os.path.join("data", "next")
+        for category in os.listdir(next_path):
+            category_path = os.path.join(next_path, category)
+            if os.path.isdir(category_path):
+                next_data[category] = {}
+                for file in os.listdir(category_path):
+                    if file.endswith(".json"):
+                        file_path = os.path.join(category_path, file)
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            json_data = json.load(f)
+                            next_data[category][file[:-5]] = json_data
+        return next_data
+
+    def process_next_data(self, prompt, separator, category, field, value, attributes=False):
+        if category in self.next_data and field in self.next_data[category]:
+            field_data = self.next_data[category][field]
+            items = field_data.get("items", [])
+            preprompt = str(field_data.get("preprompt", "")).strip()
+            field_separator = f" {str(field_data.get('separator', ', ')).strip()} "
+            endprompt = str(field_data.get("endprompt", "")).strip()
+
+            if value == "None":
+                return prompt
+            elif value == "Random":
+                selected_items = [self.rng.choice(items)]
+            elif value == "Multiple Random":
+                count = self.rng.randint(1, 3)
+                selected_items = self.rng.sample(items, min(count, len(items)))
+            else:
+                selected_items = [value]
+
+            formatted_items = []
+            for item in selected_items:
+                item_str = str(item)
+                if attributes and "attributes" in field_data and item_str in field_data["attributes"]:
+                    item_attributes = field_data["attributes"].get(item_str, [])
+                    if item_attributes:
+                        selected_attributes = self.rng.sample(item_attributes, min(3, len(item_attributes)))
+                        formatted_items.append(f"{item_str} ({', '.join(map(str, selected_attributes))})")
+                    else:
+                        formatted_items.append(item_str)
+                else:
+                    formatted_items.append(item_str)
+
+            formatted_values = field_separator.join(formatted_items)
+            formatted_addition = []
+            if preprompt:
+                formatted_addition.append(preprompt)
+            formatted_addition.append(formatted_values)
+            if endprompt:
+                formatted_addition.append(endprompt)
+
+            formatted_output = " ".join(formatted_addition).strip()
+            prompt += f" {formatted_output}"
+
+        return prompt
+
     def generate_prompt(self, seed, custom, subject, gender, artform, photo_type, body_types, default_tags, roles, hairstyles,
                         additional_details, photography_styles, device, photographer, artist, digital_artform,
-                        place, lighting, clothing, composition, pose, background, input_image):
+                        place, lighting, clothing, composition, pose, background, input_image, **next_params):
         kwargs = locals()
         del kwargs['self']
         
@@ -268,6 +328,11 @@ class PromptGenerator:
         prompt = re.sub(" +", " ", prompt)
         replaced = prompt.replace("of as", "of")
         replaced = self.clean_consecutive_commas(replaced)
+
+        # Process next_params
+        for category, fields in next_params.items():
+            for field, value in fields.items():
+                prompt = self.process_next_data(prompt, ", ", category, field, value)
 
         return self.process_string(replaced, seed)
     
