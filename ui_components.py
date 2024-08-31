@@ -61,6 +61,22 @@ def create_interface():
                     photographer = gr.Dropdown(["disabled", "random"] + PHOTOGRAPHER, label="Photographer", value="disabled")
                     artist = gr.Dropdown(["disabled", "random"] + ARTIST, label="Artist", value="disabled")
                     digital_artform = gr.Dropdown(["disabled", "random"] + DIGITAL_ARTFORM, label="Digital Artform", value="disabled")
+
+                # Add Next components
+                with gr.Accordion("More Detailed Prompt Options", open=False):
+                    next_components = {}
+                    for category, fields in prompt_generator.next_data.items():
+                        with gr.Accordion(f"{category.capitalize()} Options", open=False):
+                            category_components = {}
+                            for field, data in fields.items():
+                                if isinstance(data, list):
+                                    options = ["None", "Random", "Multiple Random"] + data
+                                elif isinstance(data, dict):
+                                    options = ["None", "Random", "Multiple Random"] + data.get("items", [])
+                                else:
+                                    options = ["None", "Random", "Multiple Random"]
+                                category_components[field] = gr.Dropdown(options, label=field.capitalize(), value="None")
+                            next_components[category] = category_components
                 
                 generate_button = gr.Button("Generate Prompt")
 
@@ -102,20 +118,7 @@ def create_interface():
             outputs=[caption_output]
         )
 
-        # Add Next components
-        next_components = {}
-        for category, fields in prompt_generator.next_data.items():
-            with gr.Accordion(f"{category.capitalize()} Options", open=False):
-                category_components = {}
-                for field, data in fields.items():
-                    if isinstance(data, list):
-                        options = ["None", "Random", "Multiple Random"] + data
-                    elif isinstance(data, dict):
-                        options = ["None", "Random", "Multiple Random"] + data.get("items", [])
-                    else:
-                        options = ["None", "Random", "Multiple Random"]
-                    category_components[field] = gr.Dropdown(options, label=field.capitalize(), value="None")
-                next_components[category] = category_components
+        
 
         def generate_prompt_with_dynamic_seed(*args, **kwargs):
             dynamic_seed = random.randint(0, 1000000)
@@ -125,19 +128,23 @@ def create_interface():
             
             # Extract next_params
             next_params = {}
+            next_args = args[22:]  # All arguments after the main ones are for next_params
+            next_arg_index = 0
             for category, fields in prompt_generator.next_data.items():
                 category_params = {}
                 for field in fields:
-                    if field in kwargs:
-                        category_params[field] = kwargs[field]
+                    value = next_args[next_arg_index]
+                    # Include all values, even "None", "Random", and "Multiple Random"
+                    category_params[field] = value
+                    next_arg_index += 1
                 if category_params:
                     next_params[category] = category_params
 
+            print(next_params)
             # Call generate_prompt with the correct arguments
             result = prompt_generator.generate_prompt(dynamic_seed, *main_args, next_params=next_params)
-            
-            # The main prompt is now the first element of the result
-            main_prompt = result[0]
+
+            print(result)
             
             return [dynamic_seed] + list(result)
 
