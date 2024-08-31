@@ -153,7 +153,7 @@ class PromptGenerator:
 
     def generate_prompt(self, seed, custom, subject, gender, artform, photo_type, body_types, default_tags, roles, hairstyles,
                     additional_details, photography_styles, device, photographer, artist, digital_artform,
-                    place, lighting, clothing, composition, pose, background, input_image, **next_params):
+                    place, lighting, clothing, composition, pose, background, input_image, next_params):
         kwargs = locals()
         del kwargs['self']
         del kwargs['next_params']
