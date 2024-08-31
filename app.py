@@ -49,11 +49,28 @@ def florence_caption(image):
     )
     return parsed_answer["<MORE_DETAILED_CAPTION>"]
 
+# Add this function to your code
+def array_to_image_path(image_array):
+    # Convert numpy array to PIL Image
+    img = Image.fromarray(np.uint8(image_array))
+    
+    # Generate a unique filename using timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"image_{timestamp}.png"
+    
+    # Save the image
+    img.save(filename)
+    
+    # Get the full path of the saved image
+    full_path = os.path.abspath(filename)
+    
+    return full_path
+
 # Qwen2-VL-2B caption function
 @spaces.GPU
 def qwen_caption(image):
     if not isinstance(image, Image.Image):
-        image = Image.fromarray(image)
+        image = Image.fromarray(np.uint8(image))
     
     image_path = array_to_image_path(np.array(image))
     
@@ -65,7 +82,7 @@ def qwen_caption(image):
                     "type": "image",
                     "image": image_path,
                 },
-                {"type": "text", "text": "Describe this image in detail."},
+                {"type": "text", "text": "Describe this image in great detail."},
             ],
         }
     ]
@@ -518,7 +535,7 @@ def create_interface():
                 with gr.Accordion("Image and Caption", open=False):
                     input_image = gr.Image(label="Input Image (optional)")
                     caption_output = gr.Textbox(label="Generated Caption", lines=3)
-                    caption_model = gr.Radio(["Florence", "Qwen"], label="Caption Model", value="Florence")
+                    caption_model = gr.Radio(["Florence-2", "Qwen2-VL"], label="Caption Model", value="Florence-2")
                     create_caption_button = gr.Button("Create Caption")
                     add_caption_button = gr.Button("Add Caption to Prompt")
 
@@ -540,9 +557,9 @@ def create_interface():
 
         def create_caption(image, model):
             if image is not None:
-                if model == "Florence":
+                if model == "Florence-2":
                     return florence_caption(image)
-                elif model == "Qwen":
+                elif model == "Qwen2-VL":
                     return qwen_caption(image)
             return ""
 
