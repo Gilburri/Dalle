@@ -136,11 +136,10 @@ def create_interface():
             # Call generate_prompt with the correct arguments
             result = prompt_generator.generate_prompt(dynamic_seed, *main_args, next_params=next_params)
             
+            # The main prompt is now the first element of the result
             main_prompt = result[0]
-            next_prompts = [v for category in next_params.values() for v in category.values() if v]
-            combined_prompt = main_prompt + " " + " ".join(next_prompts)
             
-            return [dynamic_seed, combined_prompt] + list(result[1:])
+            return [dynamic_seed] + list(result)
 
         generate_button.click(
             generate_prompt_with_dynamic_seed,

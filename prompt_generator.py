@@ -313,11 +313,18 @@ class PromptGenerator:
         replaced = self.clean_consecutive_commas(replaced)
 
         # Process next_params
+        next_prompts = []
         for category, fields in next_params.items():
             for field, value in fields.items():
-                prompt = self.process_next_data(prompt, ", ", category, field, value)
+                next_prompt = self.process_next_data("", ", ", category, field, value)
+                if next_prompt:
+                    next_prompts.append(next_prompt.strip())
 
-        return self.process_string(replaced, seed)
+        # Combine main prompt with next prompts
+        combined_prompt = replaced + " " + " ".join(next_prompts)
+        combined_prompt = self.clean_consecutive_commas(combined_prompt)
+
+        return self.process_string(combined_prompt, seed)
     
     def add_caption_to_prompt(self, prompt, caption):
         if caption:
