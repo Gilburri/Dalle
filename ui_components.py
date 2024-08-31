@@ -97,7 +97,7 @@ def create_interface():
                     clip_g_output = gr.Textbox(label="CLIP G Output", visible=True)
             
             with gr.Column(scale=2):
-                with gr.Accordion("Prompt Generation with LLM", open=False):
+                with gr.Accordion("Prompt Generation with LLM (You need to use Generate Prompt first)", open=False):
                     happy_talk = gr.Checkbox(label="Happy Talk", value=True)
                     compress = gr.Checkbox(label="Compress", value=True)
                     compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="hard")
