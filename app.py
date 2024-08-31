@@ -322,10 +322,9 @@ from openai import OpenAI
 
 class HuggingFaceInferenceNode:
     def __init__(self):
-        self.ACCESS_TOKEN = os.getenv("HF_TOKEN")
         self.client = OpenAI(
             base_url="https://api-inference.huggingface.co/v1/",
-            api_key=self.ACCESS_TOKEN,
+            api_key=huggingface_token,
         )
         self.prompts_dir = "./prompts"
         os.makedirs(self.prompts_dir, exist_ok=True)
