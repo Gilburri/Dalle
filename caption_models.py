@@ -65,7 +65,7 @@ def qwen_caption(image):
                     "type": "image",
                     "image": image_path,
                 },
-                {"type": "text", "text": "Describe this image in great detail."},
+                {"type": "text", "text": "Describe this image in great detail in one paragraph."},
             ],
         }
     ]
