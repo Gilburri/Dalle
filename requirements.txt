@@ -9,3 +9,5 @@ torchvision
 git+https://github.com/huggingface/transformers.git
 accelerate
 qwen-vl-utils
+anthropic
+groq
