@@ -109,7 +109,8 @@ def create_interface():
                     prompt_type = gr.Dropdown(
                         choices=["happy", "simple", "poster", "only_objects", "no_figure", "landscape", "fantasy"],
                         label="Prompt Type",
-                        value="happy"
+                        value="happy",
+                        interactive=True
                     )
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
                 generate_text_button = gr.Button("Generate Prompt with LLM (Llama 3.1 70B)")
