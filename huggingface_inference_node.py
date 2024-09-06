@@ -62,9 +62,10 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                 "fantasy": fantasy_prompt
             }
 
-            # Update this part to handle the prompt_type correctly
-            if prompt_type and prompt_type in prompt_types:
-                base_prompt = prompt_types[prompt_type]
+            print(f"Received prompt_type: '{prompt_type}'")  # Debug print
+
+            if prompt_type and prompt_type.strip() in prompt_types:
+                base_prompt = prompt_types[prompt_type.strip()]
                 print(f"Using {prompt_type} prompt")
             elif custom_base_prompt.strip():
                 base_prompt = custom_base_prompt

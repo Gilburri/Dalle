@@ -170,8 +170,12 @@ def create_interface():
         generate_text_button.click(
             generate_text_with_llm,
             inputs=[output, happy_talk, compress, compression_level, prompt_type, custom_base_prompt],
-            outputs=text_output
+            outputs=text_output,
+            api_name="generate_text"  # Add this line
         )
+
+        # Add this line to disable caching for the generate_text_with_llm function
+        generate_text_with_llm.cache_examples = False
 
         def update_all_options(choice):
             updates = {}
