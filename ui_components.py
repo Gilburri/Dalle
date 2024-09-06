@@ -163,8 +163,12 @@ def create_interface():
             outputs=[output]
         )
 
+        def generate_text_with_llm(output, happy_talk, compress, compression_level, prompt_type, custom_base_prompt):
+            print(f"Prompt type selected: {prompt_type}")  # Debug print
+            return huggingface_node.generate(output, happy_talk, compress, compression_level, prompt_type, custom_base_prompt)
+
         generate_text_button.click(
-            huggingface_node.generate,
+            generate_text_with_llm,
             inputs=[output, happy_talk, compress, compression_level, prompt_type, custom_base_prompt],
             outputs=text_output
         )

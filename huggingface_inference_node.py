@@ -62,14 +62,16 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                 "fantasy": fantasy_prompt
             }
 
-            if prompt_type in prompt_types:
+            # Update this part to handle the prompt_type correctly
+            if prompt_type and prompt_type in prompt_types:
                 base_prompt = prompt_types[prompt_type]
                 print(f"Using {prompt_type} prompt")
             elif custom_base_prompt.strip():
                 base_prompt = custom_base_prompt
+                print("Using custom base prompt")
             else:
                 base_prompt = default_happy_prompt
-                print(f"Warning: Unknown prompt type '{prompt_type}'. Using default happy prompt.")
+                print(f"Warning: Unknown or empty prompt type '{prompt_type}'. Using default happy prompt.")
 
             if compress and not poster:
                 compression_chars = {
