@@ -62,11 +62,11 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                 "fantasy": fantasy_prompt
             }
 
-            if custom_base_prompt.strip():
-                base_prompt = custom_base_prompt
-            elif prompt_type in prompt_types:
+            if prompt_type in prompt_types:
                 base_prompt = prompt_types[prompt_type]
                 print(f"Using {prompt_type} prompt")
+            elif custom_base_prompt.strip():
+                base_prompt = custom_base_prompt
             else:
                 base_prompt = default_happy_prompt
                 print(f"Warning: Unknown prompt type '{prompt_type}'. Using default happy prompt.")
