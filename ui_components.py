@@ -202,4 +202,6 @@ def create_interface():
             ]
         )
 
+        prompt_type.change(lambda x: print(f"Prompt type changed to: {x}"), inputs=[prompt_type])
+
     return demo
