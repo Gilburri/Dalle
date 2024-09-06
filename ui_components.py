@@ -15,6 +15,9 @@ title = """<h1 align="center">FLUX Prompt Generator</h1>
 </center></p>
 """
 
+# Add this global variable
+selected_prompt_type = "happy"  # Default value
+
 def create_interface():
     prompt_generator = PromptGenerator()
     huggingface_node = HuggingFaceInferenceNode()
@@ -113,6 +116,12 @@ def create_interface():
                         interactive=True
                     )
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
+                    def update_prompt_type(value):
+                        global selected_prompt_type
+                        selected_prompt_type = value
+                        print(f"Updated prompt type: {selected_prompt_type}")
+                        return value
+                    prompt_type.change(update_prompt_type, inputs=[prompt_type], outputs=[prompt_type])
                 generate_text_button = gr.Button("Generate Prompt with LLM (Llama 3.1 70B)")
                 text_output = gr.Textbox(label="Generated Text", lines=10)
 
@@ -171,13 +180,14 @@ def create_interface():
             outputs=[output]
         )
 
-        def generate_text_with_llm(output, happy_talk, compress, compression_level, prompt_type, custom_base_prompt):
-            print(f"Prompt type selected: {prompt_type}")  # Debug print
-            return huggingface_node.generate(output, happy_talk, compress, compression_level, prompt_type, custom_base_prompt)
+        def generate_text_with_llm(output, happy_talk, compress, compression_level, custom_base_prompt):
+            global selected_prompt_type
+            print(f"Prompt type selected in UI: {selected_prompt_type}")  # Debug print
+            return huggingface_node.generate(output, happy_talk, compress, compression_level, False, selected_prompt_type, custom_base_prompt)
 
         generate_text_button.click(
             generate_text_with_llm,
-            inputs=[output, happy_talk, compress, compression_level, prompt_type, custom_base_prompt],
+            inputs=[output, happy_talk, compress, compression_level, custom_base_prompt],
             outputs=text_output,
             api_name="generate_text"  # Add this line
         )
