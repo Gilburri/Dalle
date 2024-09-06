@@ -1,17 +1,20 @@
 import os
 from openai import OpenAI
+import anthropic
+from groq import Groq
 import re
 from datetime import datetime
 
-
 huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
+groq_api_key = os.getenv("GROQ_API_KEY")
 
-class HuggingFaceInferenceNode:
+class LLMInferenceNode:
     def __init__(self):
-        self.client = OpenAI(
+        self.huggingface_client = OpenAI(
             base_url="https://api-inference.huggingface.co/v1/",
             api_key=huggingface_token,
         )
+        self.groq_client = Groq(api_key=groq_api_key)
         self.prompts_dir = "./prompts"
         os.makedirs(self.prompts_dir, exist_ok=True)
 
@@ -28,7 +31,7 @@ class HuggingFaceInferenceNode:
         
         print(f"Prompt saved to {filename}")
 
-    def generate(self, input_text, happy_talk, compress, compression_level, poster, prompt_type, custom_base_prompt=""):
+    def generate(self, input_text, happy_talk, compress, compression_level, poster, prompt_type, custom_base_prompt="", provider="Hugging Face", api_key=None, model=None):
         try:
             default_happy_prompt = """Create a detailed visually descriptive caption of this description, which will be used as a prompt for a text to image AI system (caption only, no instructions like "create an image").Remove any mention of digital artwork or artwork style. Give detailed visual descriptions of the character(s), including ethnicity, skin tone, expression etc. Imagine using keywords for a still for someone who has aphantasia. Describe the image style, e.g. any photographic or art styles / techniques utilized. Make sure to fully describe all aspects of the cinematography, with abundant technical details and visual descriptions. If there is more than one image, combine the elements and characters from all of the images creatively into a single cohesive composition with a single background, inventing an interaction between the characters. Be creative in combining the characters into a single cohesive scene. Focus on two primary characters (or one) and describe an interesting interaction between them, such as a hug, a kiss, a fight, giving an object, an emotional reaction / interaction. If there is more than one background in the images, pick the most appropriate one. Your output is only the caption itself, no comments or extra formatting. The caption is in a single long paragraph. If you feel the images are inappropriate, invent a new scene / characters inspired by these. Additionally, incorporate a specific movie director's visual style and describe the lighting setup in detail, including the type, color, and placement of light sources to create the desired mood and atmosphere. Always frame the scene, including details about the film grain, color grading, and any artifacts or characteristics specific."""
 
@@ -86,20 +89,67 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
             system_message = "You are a helpful assistant. Try your best to give the best response possible to the user."
             user_message = f"{base_prompt}\nDescription: {input_text}"
 
-            messages = [
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_message}
-            ]
+            if provider == "Hugging Face":
+                response = self.huggingface_client.chat.completions.create(
+                    model=model or "meta-llama/Meta-Llama-3.1-70B-Instruct",
+                    max_tokens=1024,
+                    temperature=0.7,
+                    top_p=0.95,
+                    messages=[
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": user_message}
+                    ],
+                )
+                output = response.choices[0].message.content.strip()
 
-            response = self.client.chat.completions.create(
-                model="meta-llama/Meta-Llama-3.1-70B-Instruct",
-                max_tokens=1024,
-                temperature=0.7,
-                top_p=0.95,
-                messages=messages,
-            )
+            elif provider == "OpenAI":
+                openai_client = OpenAI(api_key=api_key)
+                response = openai_client.chat.completions.create(
+                    model=model or "gpt-4",
+                    max_tokens=1024,
+                    temperature=0.7,
+                    messages=[
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": user_message}
+                    ],
+                )
+                output = response.choices[0].message.content.strip()
 
-            output = response.choices[0].message.content.strip()
+            elif provider == "Anthropic":
+                anthropic_client = anthropic.Anthropic(api_key=api_key)
+                response = anthropic_client.messages.create(
+                    model=model or "claude-3-5-sonnet-20240620",
+                    max_tokens=1024,
+                    temperature=0.7,
+                    system=system_message,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": user_message
+                                }
+                            ]
+                        }
+                    ]
+                )
+                output = response.content[0].text
+
+            elif provider == "Groq":
+                response = self.groq_client.chat.completions.create(
+                    model=model or "llama-3.1-70b-versatile",
+                    max_tokens=1024,
+                    temperature=0.7,
+                    messages=[
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": user_message}
+                    ],
+                )
+                output = response.choices[0].message.content.strip()
+
+            else:
+                raise ValueError(f"Unsupported provider: {provider}")
 
             # Clean up the output
             if ": " in output:

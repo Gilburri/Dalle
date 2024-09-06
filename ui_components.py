@@ -1,6 +1,6 @@
 import gradio as gr
 from prompt_generator import PromptGenerator
-from huggingface_inference_node import HuggingFaceInferenceNode
+from huggingface_inference_node import LLMInferenceNode
 from caption_models import florence_caption, qwen_caption
 import random
 from prompt_generator import ARTFORM, PHOTO_TYPE, FEMALE_BODY_TYPES, MALE_BODY_TYPES, FEMALE_DEFAULT_TAGS, MALE_DEFAULT_TAGS, ROLES, HAIRSTYLES, FEMALE_CLOTHING, MALE_CLOTHING, PLACE, LIGHTING, COMPOSITION, POSE, BACKGROUND, FEMALE_ADDITIONAL_DETAILS, MALE_ADDITIONAL_DETAILS, PHOTOGRAPHY_STYLES, DEVICE, PHOTOGRAPHER, ARTIST, DIGITAL_ARTFORM
@@ -20,7 +20,7 @@ selected_prompt_type = "happy"  # Default value
 
 def create_interface():
     prompt_generator = PromptGenerator()
-    huggingface_node = HuggingFaceInferenceNode()
+    llm_node = LLMInferenceNode()
 
     with gr.Blocks(theme='bethecloud/storj_theme') as demo:
         
@@ -116,13 +116,17 @@ def create_interface():
                         interactive=True
                     )
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
-                    def update_prompt_type(value):
-                        global selected_prompt_type
-                        selected_prompt_type = value
-                        print(f"Updated prompt type: {selected_prompt_type}")
-                        return value
-                    prompt_type.change(update_prompt_type, inputs=[prompt_type], outputs=[prompt_type])
-                generate_text_button = gr.Button("Generate Prompt with LLM (Llama 3.1 70B)")
+                    
+                    # Add new components for LLM provider selection
+                    llm_provider = gr.Dropdown(
+                        choices=["Hugging Face", "OpenAI", "Anthropic", "Groq"],
+                        label="LLM Provider",
+                        value="Hugging Face"
+                    )
+                    api_key = gr.Textbox(label="API Key", type="password", visible=False)
+                    model = gr.Dropdown(label="Model", choices=["meta-llama/Meta-Llama-3.1-70B-Instruct"], value="meta-llama/Meta-Llama-3.1-70B-Instruct")
+
+                generate_text_button = gr.Button("Generate Prompt with LLM")
                 text_output = gr.Textbox(label="Generated Text", lines=10)
 
         def create_caption(image, model):
@@ -180,16 +184,32 @@ def create_interface():
             outputs=[output]
         )
 
-        def generate_text_with_llm(output, happy_talk, compress, compression_level, custom_base_prompt):
+        def update_model_choices(provider):
+            provider_models = {
+                "Hugging Face": ["meta-llama/Meta-Llama-3.1-70B-Instruct"],
+                "Groq": ["llama-3.1-70b-versatile"],
+                "OpenAI": ["gpt-4o", "gpt-4o-mini"],
+                "Anthropic": ["claude-3-5-sonnet-20240620"],
+            }
+            models = provider_models[provider]
+            return gr.Dropdown(choices=models, value=models[0])
+
+        def update_api_key_visibility(provider):
+            return gr.update(visible=(provider in ["OpenAI", "Anthropic"]))
+
+        llm_provider.change(update_model_choices, inputs=[llm_provider], outputs=[model])
+        llm_provider.change(update_api_key_visibility, inputs=[llm_provider], outputs=[api_key])
+
+        def generate_text_with_llm(output, happy_talk, compress, compression_level, custom_base_prompt, provider, api_key, model):
             global selected_prompt_type
             print(f"Prompt type selected in UI: {selected_prompt_type}")  # Debug print
-            return huggingface_node.generate(output, happy_talk, compress, compression_level, False, selected_prompt_type, custom_base_prompt)
+            return llm_node.generate(output, happy_talk, compress, compression_level, False, selected_prompt_type, custom_base_prompt, provider, api_key, model)
 
         generate_text_button.click(
             generate_text_with_llm,
-            inputs=[output, happy_talk, compress, compression_level, custom_base_prompt],
+            inputs=[output, happy_talk, compress, compression_level, custom_base_prompt, llm_provider, api_key, model],
             outputs=text_output,
-            api_name="generate_text"  # Add this line
+            api_name="generate_text"
         )
 
         # Add this line to disable caching for the generate_text_with_llm function
