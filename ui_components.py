@@ -98,11 +98,12 @@ def create_interface():
             
             with gr.Column(scale=2):
                 with gr.Accordion("""Prompt Generation with LLM 
-                                  (You need to use Generate Prompt first)""", open=False):
+                                (You need to use Generate Prompt first)""", open=False):
                     happy_talk = gr.Checkbox(label="Happy Talk", value=True)
                     compress = gr.Checkbox(label="Compress", value=True)
                     compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="hard")
-                    poster = gr.Checkbox(label="Poster", value=False)
+                    prompt_type = gr.Radio(["happy", "simple", "poster", "only_objects", "no_figure", "landscape", "fantasy"], 
+                                        label="Prompt Type", value="happy")
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
                 generate_text_button = gr.Button("Generate Prompt with LLM (Llama 3.1 70B)")
                 text_output = gr.Textbox(label="Generated Text", lines=10)
@@ -164,7 +165,7 @@ def create_interface():
 
         generate_text_button.click(
             huggingface_node.generate,
-            inputs=[output, happy_talk, compress, compression_level, poster, custom_base_prompt],
+            inputs=[output, happy_talk, compress, compression_level, prompt_type, custom_base_prompt],
             outputs=text_output
         )
 
