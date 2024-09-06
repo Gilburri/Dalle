@@ -101,9 +101,16 @@ def create_interface():
                                 (You need to use Generate Prompt first)""", open=False):
                     happy_talk = gr.Checkbox(label="Happy Talk", value=True)
                     compress = gr.Checkbox(label="Compress", value=True)
-                    compression_level = gr.Radio(["soft", "medium", "hard"], label="Compression Level", value="hard")
-                    prompt_type = gr.Radio(["happy", "simple", "poster", "only_objects", "no_figure", "landscape", "fantasy"], 
-                                        label="Prompt Type", value="happy")
+                    compression_level = gr.Dropdown(
+                        choices=["soft", "medium", "hard"],
+                        label="Compression Level",
+                        value="hard"
+                    )
+                    prompt_type = gr.Dropdown(
+                        choices=["happy", "simple", "poster", "only_objects", "no_figure", "landscape", "fantasy"],
+                        label="Prompt Type",
+                        value="happy"
+                    )
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
                 generate_text_button = gr.Button("Generate Prompt with LLM (Llama 3.1 70B)")
                 text_output = gr.Textbox(label="Generated Text", lines=10)
