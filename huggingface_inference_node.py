@@ -15,21 +15,6 @@ class LLMInferenceNode:
             api_key=huggingface_token,
         )
         self.groq_client = Groq(api_key=groq_api_key)
-        self.prompts_dir = "./prompts"
-        os.makedirs(self.prompts_dir, exist_ok=True)
-
-    def save_prompt(self, prompt):
-        filename_text = "hf_" + prompt.split(',')[0].strip()
-        filename_text = re.sub(r'[^\w\-_\. ]', '_', filename_text)
-        filename_text = filename_text[:30]  
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        base_filename = f"{filename_text}_{timestamp}.txt"
-        filename = os.path.join(self.prompts_dir, base_filename)
-        
-        with open(filename, "w") as file:
-            file.write(prompt)
-        
-        print(f"Prompt saved to {filename}")
 
     def generate(self, input_text, happy_talk, compress, compression_level, poster, prompt_type, custom_base_prompt="", provider="Hugging Face", api_key=None, model=None):
         try:
