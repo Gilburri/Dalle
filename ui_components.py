@@ -1,7 +1,7 @@
 import gradio as gr
 from prompt_generator import PromptGenerator
 from huggingface_inference_node import LLMInferenceNode
-from caption_models import florence_caption, qwen_caption
+from caption_models import florence_caption, qwen_caption, joycaption
 import random
 from prompt_generator import ARTFORM, PHOTO_TYPE, FEMALE_BODY_TYPES, MALE_BODY_TYPES, FEMALE_DEFAULT_TAGS, MALE_DEFAULT_TAGS, ROLES, HAIRSTYLES, FEMALE_CLOTHING, MALE_CLOTHING, PLACE, LIGHTING, COMPOSITION, POSE, BACKGROUND, FEMALE_ADDITIONAL_DETAILS, MALE_ADDITIONAL_DETAILS, PHOTOGRAPHY_STYLES, DEVICE, PHOTOGRAPHER, ARTIST, DIGITAL_ARTFORM
 
@@ -89,7 +89,7 @@ def create_interface():
                 with gr.Accordion("Image and Caption", open=False):
                     input_image = gr.Image(label="Input Image (optional)")
                     caption_output = gr.Textbox(label="Generated Caption", lines=3)
-                    caption_model = gr.Radio(["Florence-2", "Qwen2-VL"], label="Caption Model", value="Florence-2")
+                    caption_model = gr.Radio(["Florence-2", "Qwen2-VL", "JoyCaption"], label="Caption Model", value="Florence-2")
                     create_caption_button = gr.Button("Create Caption")
                     add_caption_button = gr.Button("Add Caption to Prompt")
 
@@ -146,6 +146,8 @@ def create_interface():
                     return florence_caption(image)
                 elif model == "Qwen2-VL":
                     return qwen_caption(image)
+                elif model == "JoyCaption":
+                    return joycaption(image)
             return ""
 
         create_caption_button.click(
