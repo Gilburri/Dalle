@@ -13,6 +13,8 @@ subprocess.run('pip install flash-attn --no-build-isolation', env={'FLASH_ATTENT
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
+HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN", None)
+
 # Initialize Florence model
 florence_model = AutoModelForCausalLM.from_pretrained('microsoft/Florence-2-large', trust_remote_code=True).to(device).eval()
 florence_processor = AutoProcessor.from_pretrained('microsoft/Florence-2-large', trust_remote_code=True)
