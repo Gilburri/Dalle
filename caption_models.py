@@ -50,10 +50,10 @@ clip_model.requires_grad_(False)
 clip_model.to(device)
 
 # Tokenizer
-tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, use_fast=False)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, use_fast=False, token=HF_TOKEN)
 
 # LLM
-text_model = AutoModelForCausalLM.from_pretrained(MODEL_PATH, device_map="auto", torch_dtype=torch.bfloat16)
+text_model = AutoModelForCausalLM.from_pretrained(MODEL_PATH, device_map="auto", torch_dtype=torch.bfloat16, token=HF_TOKEN)
 text_model.eval()
 
 # Image Adapter
