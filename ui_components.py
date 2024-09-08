@@ -215,13 +215,14 @@ def create_interface():
 
         def generate_text_with_llm(output, happy_talk, compress, compression_level, custom_base_prompt, provider, api_key, model):
             global selected_prompt_type
-            print(f"Prompt type selected in UI: {selected_prompt_type}")  # Debug print
-            return llm_node.generate(output, happy_talk, compress, compression_level, False, selected_prompt_type, custom_base_prompt, provider, api_key, model)
+            result = llm_node.generate(output, happy_talk, compress, compression_level, False, selected_prompt_type, custom_base_prompt, provider, api_key, model)
+            selected_prompt_type = "happy"  # Reset to "happy" after generation
+            return result, "happy"  # Return the result and the new prompt type value
 
         generate_text_button.click(
             generate_text_with_llm,
             inputs=[output, happy_talk, compress, compression_level, custom_base_prompt, llm_provider, api_key, model],
-            outputs=text_output,
+            outputs=[text_output, prompt_type],
             api_name="generate_text"
         )
 

@@ -1,12 +1,14 @@
 import os
-from openai import OpenAI
-import anthropic
-from groq import Groq
 import re
 from datetime import datetime
 
+import anthropic
+from groq import Groq
+from openai import OpenAI
+
 huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 groq_api_key = os.getenv("GROQ_API_KEY")
+
 
 class LLMInferenceNode:
     def __init__(self):
@@ -16,7 +18,19 @@ class LLMInferenceNode:
         )
         self.groq_client = Groq(api_key=groq_api_key)
 
-    def generate(self, input_text, happy_talk, compress, compression_level, poster, prompt_type, custom_base_prompt="", provider="Hugging Face", api_key=None, model=None):
+    def generate(
+        self,
+        input_text,
+        happy_talk,
+        compress,
+        compression_level,
+        poster,
+        prompt_type,
+        custom_base_prompt="",
+        provider="Hugging Face",
+        api_key=None,
+        model=None,
+    ):
         try:
             default_happy_prompt = """Create a detailed visually descriptive caption of this description, which will be used as a prompt for a text to image AI system (caption only, no instructions like "create an image").Remove any mention of digital artwork or artwork style. Give detailed visual descriptions of the character(s), including ethnicity, skin tone, expression etc. Imagine using keywords for a still for someone who has aphantasia. Describe the image style, e.g. any photographic or art styles / techniques utilized. Make sure to fully describe all aspects of the cinematography, with abundant technical details and visual descriptions. If there is more than one image, combine the elements and characters from all of the images creatively into a single cohesive composition with a single background, inventing an interaction between the characters. Be creative in combining the characters into a single cohesive scene. Focus on two primary characters (or one) and describe an interesting interaction between them, such as a hug, a kiss, a fight, giving an object, an emotional reaction / interaction. If there is more than one background in the images, pick the most appropriate one. Your output is only the caption itself, no comments or extra formatting. The caption is in a single long paragraph. If you feel the images are inappropriate, invent a new scene / characters inspired by these. Additionally, incorporate a specific movie director's visual style and describe the lighting setup in detail, including the type, color, and placement of light sources to create the desired mood and atmosphere. Always frame the scene, including details about the film grain, color grading, and any artifacts or characteristics specific."""
 
@@ -47,7 +61,7 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                 "only_objects": only_objects_prompt,
                 "no_figure": no_figure_prompt,
                 "landscape": landscape_prompt,
-                "fantasy": fantasy_prompt
+                "fantasy": fantasy_prompt,
             }
 
             # Update this part to handle the prompt_type correctly
@@ -60,13 +74,15 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                 print("Using custom base prompt")
             else:
                 base_prompt = default_happy_prompt
-                print(f"Warning: Unknown or empty prompt type '{prompt_type}'. Using default happy prompt.")
+                print(
+                    f"Warning: Unknown or empty prompt type '{prompt_type}'. Using default happy prompt."
+                )
 
             if compress and not poster:
                 compression_chars = {
                     "soft": 600 if happy_talk else 300,
                     "medium": 400 if happy_talk else 200,
-                    "hard": 200 if happy_talk else 100
+                    "hard": 200 if happy_talk else 100,
                 }
                 char_limit = compression_chars[compression_level]
                 base_prompt += f" Compress the output to be concise while retaining key visual details. MAX OUTPUT SIZE no more than {char_limit} characters."
@@ -82,7 +98,7 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                     top_p=0.95,
                     messages=[
                         {"role": "system", "content": system_message},
-                        {"role": "user", "content": user_message}
+                        {"role": "user", "content": user_message},
                     ],
                 )
                 output = response.choices[0].message.content.strip()
@@ -95,7 +111,7 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                     temperature=0.7,
                     messages=[
                         {"role": "system", "content": system_message},
-                        {"role": "user", "content": user_message}
+                        {"role": "user", "content": user_message},
                     ],
                 )
                 output = response.choices[0].message.content.strip()
@@ -110,14 +126,9 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                     messages=[
                         {
                             "role": "user",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": user_message
-                                }
-                            ]
+                            "content": [{"type": "text", "text": user_message}],
                         }
-                    ]
+                    ],
                 )
                 output = response.content[0].text
 
@@ -128,7 +139,7 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                     temperature=0.7,
                     messages=[
                         {"role": "system", "content": system_message},
-                        {"role": "user", "content": user_message}
+                        {"role": "user", "content": user_message},
                     ],
                 )
                 output = response.choices[0].message.content.strip()
@@ -143,7 +154,7 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                 sentences = output.split(". ")
                 if len(sentences) > 1:
                     output = ". ".join(sentences[1:]).strip()
-            
+
             return output
 
         except Exception as e:
