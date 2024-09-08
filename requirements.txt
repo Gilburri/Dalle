@@ -11,3 +11,5 @@ accelerate
 qwen-vl-utils
 anthropic
 groq
+sentencepiece
+huggingface_hub==0.24.3
