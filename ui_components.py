@@ -88,16 +88,16 @@ def create_interface():
 
                 with gr.Accordion("Image and Caption", open=False):
                     input_image = gr.Image(label="Input Image (optional)")
-                    caption_output = gr.Textbox(label="Generated Caption", lines=3)
+                    caption_output = gr.Textbox(label="Generated Caption", lines=3, show_copy_button=True)
                     caption_model = gr.Radio(["Florence-2", "Qwen2-VL", "JoyCaption"], label="Caption Model", value="Florence-2")
                     create_caption_button = gr.Button("Create Caption")
                     add_caption_button = gr.Button("Add Caption to Prompt")
 
                 with gr.Accordion("Prompt Generation", open=True):
-                    output = gr.Textbox(label="Generated Prompt / Input Text", lines=4)
-                    t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True)
-                    clip_l_output = gr.Textbox(label="CLIP L Output", visible=True)
-                    clip_g_output = gr.Textbox(label="CLIP G Output", visible=True)
+                    output = gr.Textbox(label="Generated Prompt / Input Text", lines=4, show_copy_button=True)
+                    t5xxl_output = gr.Textbox(label="T5XXL Output", visible=True, show_copy_button=True)
+                    clip_l_output = gr.Textbox(label="CLIP L Output", visible=True, show_copy_button=True)
+                    clip_g_output = gr.Textbox(label="CLIP G Output", visible=True, show_copy_button=True)
             
             with gr.Column(scale=2):
                 with gr.Accordion("""Prompt Generation with LLM 
@@ -138,7 +138,7 @@ def create_interface():
                     model = gr.Dropdown(label="Model", choices=["meta-llama/Meta-Llama-3.1-70B-Instruct"], value="meta-llama/Meta-Llama-3.1-70B-Instruct")
 
                 generate_text_button = gr.Button("Generate Prompt with LLM")
-                text_output = gr.Textbox(label="Generated Text", lines=10)
+                text_output = gr.Textbox(label="Generated Text", lines=10, show_copy_button=True)
 
         def create_caption(image, model):
             if image is not None:
