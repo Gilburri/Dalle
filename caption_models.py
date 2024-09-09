@@ -49,18 +49,24 @@ clip_model.eval()
 clip_model.requires_grad_(False)
 clip_model.to(device)
 
-# Tokenizer
-tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, use_fast=False, token=HF_TOKEN)
+if HF_TOKEN is not None:
+    # Tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, use_fast=False, token=HF_TOKEN)
 
-# LLM
-text_model = AutoModelForCausalLM.from_pretrained(MODEL_PATH, device_map="auto", torch_dtype=torch.bfloat16, token=HF_TOKEN)
-text_model.eval()
+    # LLM
+    text_model = AutoModelForCausalLM.from_pretrained(MODEL_PATH, device_map="auto", torch_dtype=torch.bfloat16, token=HF_TOKEN)
+    text_model.eval()
 
-# Image Adapter
-image_adapter = ImageAdapter(clip_model.config.hidden_size, text_model.config.hidden_size)
-image_adapter.load_state_dict(torch.load(f"{CHECKPOINT_PATH}/image_adapter.pt", map_location="cpu"))
-image_adapter.eval()
-image_adapter.to(device)
+    # Image Adapter
+    image_adapter = ImageAdapter(clip_model.config.hidden_size, text_model.config.hidden_size)
+    image_adapter.load_state_dict(torch.load(f"{CHECKPOINT_PATH}/image_adapter.pt", map_location="cpu"))
+    image_adapter.eval()
+    image_adapter.to(device)
+else:
+    print("HUGGINGFACE_TOKEN is not set.")
+    tokenizer = None
+    text_model = None
+    image_adapter = None
 
 @spaces.GPU
 def florence_caption(image):
@@ -138,6 +144,7 @@ def qwen_caption(image):
 @spaces.GPU
 @torch.no_grad()
 def joycaption(image):
+    if text_model is None: return ""
     if not isinstance(image, Image.Image):
         image = Image.fromarray(np.uint8(image))
     

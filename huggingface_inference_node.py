@@ -12,11 +12,19 @@ groq_api_key = os.getenv("GROQ_API_KEY")
 
 class LLMInferenceNode:
     def __init__(self):
-        self.huggingface_client = OpenAI(
-            base_url="https://api-inference.huggingface.co/v1/",
-            api_key=huggingface_token,
-        )
-        self.groq_client = Groq(api_key=groq_api_key)
+        try:
+            self.huggingface_client = OpenAI(
+                base_url="https://api-inference.huggingface.co/v1/",
+                api_key=huggingface_token,
+            )
+        except Exception:
+            print("Error occurred while initializing OpenAI client.")
+            self.huggingface_client = None
+        try:
+            self.groq_client = Groq(api_key=groq_api_key)
+        except Exception:
+            print("Error occurred while initializing Groq client.")
+            self.groq_client = None
 
     def generate(
         self,
@@ -90,7 +98,7 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
             system_message = "You are a helpful assistant. Try your best to give the best response possible to the user."
             user_message = f"{base_prompt}\nDescription: {input_text}"
 
-            if provider == "Hugging Face":
+            if provider == "Hugging Face" and self.huggingface_client is not None:
                 response = self.huggingface_client.chat.completions.create(
                     model=model or "meta-llama/Meta-Llama-3.1-70B-Instruct",
                     max_tokens=1024,
@@ -132,7 +140,7 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
                 )
                 output = response.content[0].text
 
-            elif provider == "Groq":
+            elif provider == "Groq" and self.groq_client is not None:
                 response = self.groq_client.chat.completions.create(
                     model=model or "llama-3.1-70b-versatile",
                     max_tokens=1024,
