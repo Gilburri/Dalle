@@ -109,24 +109,25 @@ def create_interface():
                         label="Compression Level",
                         value="hard"
                     )
-                    prompt_type = gr.Dropdown(
-                        choices=["happy", "simple", "poster", "only_objects", "no_figure", "landscape", "fantasy"],
-                        label="Prompt Type",
-                        value="happy",
-                        interactive=True
-                    )
-                    
-                    # Add the missing update_prompt_type function
-                    def update_prompt_type(value):
-                        global selected_prompt_type
-                        selected_prompt_type = value
-                        print(f"Updated prompt type: {selected_prompt_type}")
-                        return value
-                    
-                    # Connect the update_prompt_type function to the prompt_type dropdown
-                    prompt_type.change(update_prompt_type, inputs=[prompt_type], outputs=[prompt_type])
-                    
+
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
+
+                prompt_type = gr.Dropdown(
+                    choices=["happy", "simple", "poster", "only_objects", "no_figure", "landscape", "fantasy"],
+                    label="Prompt Type",
+                    value="happy",
+                    interactive=True
+                )
+                    
+                # Add the missing update_prompt_type function
+                def update_prompt_type(value):
+                    global selected_prompt_type
+                    selected_prompt_type = value
+                    print(f"Updated prompt type: {selected_prompt_type}")
+                    return value
+                
+                # Connect the update_prompt_type function to the prompt_type dropdown
+                prompt_type.change(update_prompt_type, inputs=[prompt_type], outputs=[prompt_type])                   
                     
                     # Add new components for LLM provider selection
                 llm_provider = gr.Dropdown(
