@@ -129,13 +129,13 @@ def create_interface():
                     custom_base_prompt = gr.Textbox(label="Custom Base Prompt", lines=5)
                     
                     # Add new components for LLM provider selection
-                    llm_provider = gr.Dropdown(
-                        choices=["Hugging Face", "OpenAI", "Anthropic", "Groq"],
-                        label="LLM Provider",
-                        value="Hugging Face"
-                    )
-                    api_key = gr.Textbox(label="API Key", type="password", visible=False)
-                    model = gr.Dropdown(label="Model", choices=["meta-llama/Meta-Llama-3.1-70B-Instruct"], value="meta-llama/Meta-Llama-3.1-70B-Instruct")
+                llm_provider = gr.Dropdown(
+                    choices=["Hugging Face", "OpenAI", "Anthropic", "Groq"],
+                    label="LLM Provider",
+                    value="Hugging Face"
+                )
+                api_key = gr.Textbox(label="API Key", type="password", visible=False)
+                model = gr.Dropdown(label="Model", choices=["meta-llama/Meta-Llama-3.1-70B-Instruct"], value="meta-llama/Meta-Llama-3.1-70B-Instruct")
 
                 generate_text_button = gr.Button("Generate Prompt with LLM")
                 text_output = gr.Textbox(label="Generated Text", lines=10, show_copy_button=True)
