@@ -8,6 +8,7 @@ from openai import OpenAI
 
 huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 groq_api_key = os.getenv("GROQ_API_KEY")
+sambanova_api_key = os.getenv("SAMBANOVA_API_KEY")
 
 
 class LLMInferenceNode:
@@ -17,6 +18,10 @@ class LLMInferenceNode:
             api_key=huggingface_token,
         )
         self.groq_client = Groq(api_key=groq_api_key)
+        self.sambanova_client = OpenAI(
+            api_key=sambanova_api_key,
+            base_url="https://api.sambanova.ai/v1",
+        )
 
     def generate(
         self,
@@ -135,6 +140,18 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
             elif provider == "Groq":
                 response = self.groq_client.chat.completions.create(
                     model=model or "llama-3.1-70b-versatile",
+                    max_tokens=1024,
+                    temperature=0.7,
+                    messages=[
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": user_message},
+                    ],
+                )
+                output = response.choices[0].message.content.strip()
+
+            elif provider == "SambaNova":
+                response = self.sambanova_client.chat.completions.create(
+                    model=model or "Meta-Llama-3.1-70B-Instruct",
                     max_tokens=1024,
                     temperature=0.7,
                     messages=[

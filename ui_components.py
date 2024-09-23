@@ -131,7 +131,7 @@ def create_interface():
                     
                     # Add new components for LLM provider selection
                 llm_provider = gr.Dropdown(
-                    choices=["Hugging Face", "OpenAI", "Anthropic", "Groq"],
+                    choices=["Hugging Face", "Groq", "SambaNova", "OpenAI", "Anthropic"],
                     label="LLM Provider",
                     value="Hugging Face"
                 )
@@ -204,6 +204,7 @@ def create_interface():
                 "Groq": ["llama-3.1-70b-versatile"],
                 "OpenAI": ["gpt-4o", "gpt-4o-mini"],
                 "Anthropic": ["claude-3-5-sonnet-20240620"],
+                "SambaNova": ["Meta-Llama-3.1-70B-Instruct"],
             }
             models = provider_models[provider]
             return gr.Dropdown(choices=models, value=models[0])
