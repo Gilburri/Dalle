@@ -1,8 +1,8 @@
 ---
 title: FLUX Prompt Generator
 emoji: 😻
-colorFrom: blue
-colorTo: gray
+colorFrom: red
+colorTo: blue
 sdk: gradio
 sdk_version: 4.40.0
 app_file: app.py
