@@ -200,7 +200,7 @@ def create_interface():
 
         def update_model_choices(provider):
             provider_models = {
-                "Hugging Face": ["meta-llama/Meta-Llama-3.1-70B-Instruct"],
+                "Hugging Face": ["Qwen/Qwen2.5-72B-Instruct", "meta-llama/Meta-Llama-3.1-70B-Instruct", "mistralai/Mixtral-8x7B-Instruct-v0.1", "mistralai/Mistral-7B-Instruct-v0.3"],
                 "Groq": ["llama-3.1-70b-versatile", "mixtral-8x7b-32768", "gemma2-9b-it"],
                 "OpenAI": ["gpt-4o", "gpt-4o-mini"],
                 "Anthropic": ["claude-3-5-sonnet-20240620"],
