@@ -133,10 +133,10 @@ def create_interface():
                 llm_provider = gr.Dropdown(
                     choices=["Hugging Face", "Groq", "SambaNova", "OpenAI", "Anthropic"],
                     label="LLM Provider",
-                    value="Groq"
+                    value="Hugging Face"
                 )
                 api_key = gr.Textbox(label="API Key", type="password", visible=False)
-                model = gr.Dropdown(label="Model", choices=["llama-3.1-70b-versatile", "mixtral-8x7b-32768", "gemma2-9b-it"], value="llama-3.1-70b-versatile")
+                model = gr.Dropdown(label="Model", choices=["Qwen/Qwen2.5-72B-Instruct", "meta-llama/Meta-Llama-3.1-70B-Instruct", "mistralai/Mixtral-8x7B-Instruct-v0.1", "mistralai/Mistral-7B-Instruct-v0.3"], value="Qwen/Qwen2.5-72B-Instruct")
 
                 generate_text_button = gr.Button("Generate Prompt with LLM")
                 text_output = gr.Textbox(label="Generated Text", lines=10, show_copy_button=True)
