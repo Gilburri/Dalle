@@ -5,7 +5,6 @@ from datetime import datetime
 import anthropic
 from groq import Groq
 from openai import OpenAI
-from gradio_client import Client
 
 huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 groq_api_key = os.getenv("GROQ_API_KEY")
@@ -23,8 +22,6 @@ class LLMInferenceNode:
             api_key=sambanova_api_key,
             base_url="https://api.sambanova.ai/v1",
         )
-        self.huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
-        self.flux_client = Client("KingNish/Realtime-FLUX", hf_token=self.huggingface_token)
 
     def generate(
         self,
@@ -180,18 +177,3 @@ You are allowed to make up film and branding names, and do them like 80's, 90's 
         except Exception as e:
             print(f"An error occurred: {e}")
             return f"Error occurred while processing the request: {str(e)}"
-
-    def generate_image(self, prompt, seed=42, width=1024, height=1024):
-        try:
-            result = self.flux_client.predict(
-                prompt=prompt,
-                seed=seed,
-                width=width,
-                height=height,
-                api_name="/generate_image"
-            )
-            # Extract the image path from the result tuple
-            image_path = result[0]
-            return image_path
-        except Exception as e:
-            raise Exception(f"Error generating image: {str(e)}")
