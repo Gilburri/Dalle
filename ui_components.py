@@ -141,6 +141,14 @@ def create_interface():
                 generate_text_button = gr.Button("Generate Prompt with LLM")
                 text_output = gr.Textbox(label="Generated Text", lines=10, show_copy_button=True)
 
+            with gr.Column(scale=2):
+                with gr.Accordion("Image Generation", open=True):
+                    image_output = gr.Image(label="Generated Image", type="filepath")
+                    generate_image_button = gr.Button("Generate Image")
+                    image_seed = gr.Number(label="Image Seed", value=42, step=1)
+                    image_width = gr.Slider(label="Width", minimum=512, maximum=2048, value=1024, step=64)
+                    image_height = gr.Slider(label="Height", minimum=512, maximum=2048, value=1024, step=64)
+
         def create_caption(image, model):
             if image is not None:
                 if model == "Florence-2":
@@ -262,6 +270,23 @@ def create_interface():
                 place, lighting, composition, pose, background, additional_details,
                 photography_styles, device, photographer, artist, digital_artform
             ]
+        )
+
+        # Function to generate image
+        def generate_image(text, seed, width, height):
+            try:
+                image_path = llm_node.generate_image(text, seed=seed, width=width, height=height)
+                print(f"Image generated: {image_path}")
+                return image_path
+            except Exception as e:
+                print(f"An error occurred while generating the image: {e}")
+                return None
+
+        # Connect the image generation button
+        generate_image_button.click(
+            generate_image,
+            inputs=[text_output, image_seed, image_width, image_height],
+            outputs=[image_output]
         )
 
     return demo
